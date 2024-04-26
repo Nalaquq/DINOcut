@@ -81,6 +81,7 @@ def cuda_enabled() -> str:
         return "cpu"
 
 
+
 # Enable CUDA
 device = cuda_enabled()
 print(f"Using device: {device}")
