@@ -1,0 +1,14 @@
+# ignore venv
+venv
+#ignore sam folder
+sam
+#ignore GroundingDINO
+GroundingDINO
+#Ignore Data
+data
+#Ignore Images Directory
+dataset
+#ignore Images directory
+images 
+#Ignore Examples
+examples 
