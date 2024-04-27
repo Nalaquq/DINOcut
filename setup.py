@@ -67,7 +67,7 @@ def install_requirements(repo_name: str) -> None:
 # Main execution logic
 repository_url = "https://github.com/IDEA-Research/GroundingDINO.git"
 commit_hash = "57535c5a79791cb76e36fdb64975271354f10251"
-package_name = "GroundingDINO"  # Assuming this is the correct package name
+package_name = "GroundingDINO"  
 
 install_requirements("requirements.txt")
 

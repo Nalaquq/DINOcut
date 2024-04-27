@@ -172,6 +172,13 @@ def get_img_and_mask(img_path: str, mask_path: str) -> tuple[np.ndarray, np.ndar
         This will load the image and mask from the specified paths, convert them to RGB, and convert the mask to a binary format.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     img = cv2.imread(img_path)
     if img is None:
@@ -216,6 +223,13 @@ def resize_img(
         then it resizes the shortest dimension to 600 pixels directly.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     h, w = img.shape[0], img.shape[1]
 
@@ -311,6 +325,13 @@ def resize_transform_obj(
         maintaining the aspect ratio, and apply additional transformations if provided.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     h, w = mask.shape[:2]
 
@@ -368,6 +389,13 @@ def add_obj(
         handles different cases based on the boundaries and whether the specified coordinates are inside the composition.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     h_comp, w_comp = img_comp.shape[0], img_comp.shape[1]
 
@@ -484,6 +512,13 @@ def create_bg_with_noise(
         minimum and maximum dimensions. Noise objects are chosen randomly, and their placement on the background is also random.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     if blank_bg:
         img_comp_bg = np.ones((bg_min, bg_max, 3), dtype=np.uint8) * 255
@@ -538,6 +573,13 @@ def check_areas(
         where object independence in detection or analysis is necessary.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     obj_ids = np.unique(mask_comp).astype(np.uint8)[
         1:-1
@@ -587,6 +629,13 @@ def create_composition(
         The process respects the maximum number of placement attempts for each object.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     obj_dict = obj_list()
     img_comp = img_comp_bg.copy()
@@ -661,6 +710,13 @@ def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> l
         them according to the YOLO annotation standard.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     comp_w, comp_h = mask_comp.shape[1], mask_comp.shape[0]
 
@@ -718,6 +774,13 @@ def generate_dataset(imgs_number: int, folder: str, split: str = "train") -> Non
         Exception: If any of the called functions (`create_bg_with_noise`, `create_composition`, etc.) fail.
     Citation:
         Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
+        Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
+author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
+title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
     """
     time_start = time.time()
     timing = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
