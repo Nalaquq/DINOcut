@@ -1,7 +1,16 @@
 import subprocess
 import sys
 
+from distutils.core import setup
 
+setup(name='DinoCut',
+      version='1.0',
+      description='Image Processing Pipeline for Synthetic Data Generation',
+      author='Sean Gleason',
+      author_email='sgleason@nalaquq.com',
+      url='https://www.python.org/sigs/distutils-sig/',
+      packages=['distutils', 'distutils.command'],
+     )
 def run_command(command: str) -> None:
     """
     Runs a shell command and handles exceptions.
