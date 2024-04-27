@@ -1,7 +1,10 @@
 
-![](./assets/DINOcut_thumbnail.png)
+<div align="center">
+    <img src="./assets/DINOcut_thumbnail.png" width="%">
+</div>
 
-# DINOcut: An Image Processing Pipeline for Object Detection using Grounding DINO, SAM, and BGcut
+
+# 🦖 DinoCut ✂️
 
 
 [![YouTube](https://badges.aleen42.com/src/youtube.svg)](https://www.youtube.com/watch?v=Cf0wft5CKT4) [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1xbq9rEOtyQh8QUQU-__E-Ub3Wy3X1NoV)[![Static Badge](https://img.shields.io/badge/GroundingDINO-arXiv-blue)](https://arxiv.org/abs/2303.05499) [![Static Badge](https://img.shields.io/badge/Segment_Anything-arXiv-blue)](https://arxiv.org/abs/2304.02643) [![Static Badge](https://img.shields.io/badge/Cut_Paste_Learn-arXiv-blue)](https://arxiv.org/abs/1708.01642) [![Static Badge](https://img.shields.io/badge/Grounded_SAM-arXiv-blue)](https://arxiv.org/abs/2401.14159)
@@ -11,9 +14,10 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 
 
-# Conceptual Design 
-The goal of this project is simple: to combine sommething old with soemthing new. 
+# 🧠 🚀Conceptual Design 📚 🤯
+The goal of this project is simple: to combine sommething old with soemthing new. So we've created an image processing pipeline for object detection using Grounding DINO; SAM; and a cut, paste learn (BGcut) approach. The result is a semi-supervised image processing pipeline that allows users to generate large, synthetic datasets for object detection without the hassle of manually labeling bounding boxes or creating segmentation masks. 
  
+ # 📓 
 
 # Directory structure
 
@@ -27,6 +31,7 @@ The goal of this project is simple: to combine sommething old with soemthing new
     └── synthetic.py		# Script for generating the synthetic dataset using a CLI 	
     └── README.md
 
+# Installation 
 
 # Languages & Dependencies 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
