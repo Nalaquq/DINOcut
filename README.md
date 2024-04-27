@@ -18,18 +18,53 @@ The goal of this project is simple: to combine sommething old with soemthing new
  
 # 🔧 Install 🔩
 
-**Notes:**
+**Installation:**
 
-DinoCut is designed to work with CUDA environments given it's reliance on Grounding Dino https://github.com/IDEA-Research/GroundingDINO/tree/main and SAM https://github.com/facebookresearch/segment-anything. To use CUDA you will need to ensure that your environment variable `CUDA_HOME` is set. 
+1.Clone DinoCut from GitHub.
 
-Please make sure following the installation steps strictly, otherwise the program may produce: 
 ```bash
-NameError: name '_C' is not defined
+git clone https://github.com/Nalaquq/cmm.git
 ```
 
-If this happened, please reinstalled the groundingDINO by reclone the git and do all the installation steps again.
+2. Install the required dependencies.
+
+```bash
+pip install -e .
+```
+
+# 😳 Troubleshooting 😡
+**Virtual Environments:**
+
+We strongly encourage the use of a python virtual environment to manage packages and paths. To create a virtual environment use the following command: 
+
+```bash
+python3 -m venv venv
+```
+
+To activate your virtual environment use the following command at the beginning of each session: 
+
+```bash
+python3 -m venv venv
+``` 
+
+or use the venv.sh script to acivate the environment and create an up to date directory map of your project:
+
+```bash
+source venv.sh
+``` 
+At the end of your session deactivate the venv: 
+
+```bash
+deactivate
+``` 
+
+**CUDA Support**
+
+DinoCut is designed to work with [CUDA](https://pytorch.org/get-started/locally/) given it's reliance on [Grounding Dino](https://github.com/IDEA-Research/GroundingDINO/tree/main) and [SAM](https://github.com/facebookresearch/segment-anything). To use CUDA you will need to ensure that your environment variable `CUDA_HOME` is set. 
+
+Please make sure following the installation steps, 
  
-#### how to check cuda:
+#### Check CUDA_HOME Path:
 ```bash
 echo $CUDA_HOME
 ```
@@ -40,7 +75,7 @@ Run this so the environment variable will be set under current shell.
 export CUDA_HOME=/path/to/cuda-11.3
 ```
 
-Notice the version of cuda should be aligned with your CUDA runtime, for there might exists multiple cuda at the same time. 
+Notice the version of cuda should be aligned with your CUDA runtime in case you have multiple CUDA version installed. 
 
 If you want to set the CUDA_HOME permanently, store it using:
 
@@ -65,19 +100,6 @@ export CUDA_HOME=/usr/local/cuda
 
 https://github.com/IDEA-Research/GroundingDINO/issues/193 
 
-**Installation:**
-
-1.Clone DinoCut from GitHub.
-
-```bash
-git clone https://github.com/Nalaquq/cmm.git
-```
-
-2. Install the required dependencies.
-
-```bash
-pip install -e .
-```
 
 
  # 📓 Resources # 
