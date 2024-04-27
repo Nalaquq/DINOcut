@@ -145,6 +145,16 @@ def enhance_class_name(class_names: List[str]) -> List[str]:
         a collection of items of that class by adding 'all ' before the name and appending
         an 's' at the end. This is useful for creating labels or descriptions that need to
         refer to multiple instances of each class.
+    Citation:
+         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+            @misc{ren2024grounded,
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
+                    year={2024},
+                    eprint={2401.14159},
+                    archivePrefix={arXiv},
+                    primaryClass={cs.CV}
+                    }
     """
     return [f"all {class_name}s" for class_name in class_names]
 
@@ -181,6 +191,16 @@ def dino_detection(
 
         detections = dino_detection(image, class_names, box_threshold, text_threshold)
         print(detections)
+    Citation:
+         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+            @misc{ren2024grounded,
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
+                    year={2024},
+                    eprint={2401.14159},
+                    archivePrefix={arXiv},
+                    primaryClass={cs.CV}
+                    }
     """
     # Assuming grounding_dino_model is predefined and has a predict_with_classes method
     enhanced_classes = enhance_class_name(class_names)
@@ -221,6 +241,16 @@ def dino_display_image(
         detections = [(0, 0, 0.9, 1, 0), (0, 0, 0.75, 0, 0)]
         CLASSES = ['cat', 'dog']
         dino_display_image(image, detections, CLASSES)
+    Citation:
+         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+            @misc{ren2024grounded,
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
+                    year={2024},
+                    eprint={2401.14159},
+                    archivePrefix={arXiv},
+                    primaryClass={cs.CV}
+                    }
     """
     box_annotator = sv.BoxAnnotator()
     labels = [
@@ -272,6 +302,16 @@ def show_sam_detections(
         ]
         CLASSES = ['cat', 'dog', 'bird']
         show_sam_detections(image, detections, CLASSES)
+    Citation:
+         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+            @misc{ren2024grounded,
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
+                    year={2024},
+                    eprint={2401.14159},
+                    archivePrefix={arXiv},
+                    primaryClass={cs.CV}
+                    }
     """
     # Initialize annotators
     box_annotator = sv.BoxAnnotator()
