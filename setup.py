@@ -69,9 +69,10 @@ repository_url = "https://github.com/IDEA-Research/GroundingDINO.git"
 commit_hash = "57535c5a79791cb76e36fdb64975271354f10251"
 package_name = "GroundingDINO"  # Assuming this is the correct package name
 
-#install_requirements("requirements.txt")
+install_requirements("requirements.txt")
 
 if not check_package_installed(package_name):
+    
     install_github_repo(repository_url, commit_hash)
 else:
     print(f"{package_name} is already installed.")
