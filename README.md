@@ -12,11 +12,15 @@
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 
+#  Usage
+insert video of it working...recorded shell script..
 
-# 🧠 🚀Conceptual Design 📚 🤯
+# 🧠 Conceptual Design 📚 
 The goal of this project is simple: to combine sommething old with soemthing new. So we've created an image processing pipeline for object detection using Grounding DINO; SAM; and a cut, paste learn (BGcut) approach. The result is a semi-supervised image processing pipeline that allows users to generate large, synthetic datasets for object detection without the hassle of manually labeling bounding boxes or creating segmentation masks. 
+
+insert diagram of the workflow. . . 
  
-# 🔧 Install 🔩
+# 🔧 Install 
 
 **Installation:**
 
@@ -32,10 +36,10 @@ git clone https://github.com/Nalaquq/cmm.git
 pip install -e .
 ```
 
-# 😳 Troubleshooting 😡
+# 😳 Troubleshooting 
 **Virtual Environments:**
 
-We strongly encourage the use of a python virtual environment to manage packages and paths. To create a virtual environment use the following command: 
+We strongly encourage the use of a [python virtual environment](https://docs.python.org/3/library/venv.html) to manage packages and paths. To create a virtual environment use the following command: 
 
 ```bash
 python3 -m venv venv
@@ -44,7 +48,7 @@ python3 -m venv venv
 To activate your virtual environment use the following command at the beginning of each session: 
 
 ```bash
-python3 -m venv venv
+python3 source venv/bin/activate
 ``` 
 
 or use the venv.sh script to acivate the environment and create an up to date directory map of your project:
