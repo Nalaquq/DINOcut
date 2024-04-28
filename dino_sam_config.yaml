@@ -1,0 +1,19 @@
+
+paths:
+  grounding_dino_checkpoint_path: "groundingdino_swint_ogc.pth"
+  grounding_dino_config_path: "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+  sam_checkpoint_path: "sam_vit_h_4b8939.pth"
+
+model_configs:
+  sam:
+    encoder_version: "vit_h"
+    checkpoint_path: "sam_vit_h_4b8939.pth"
+
+image_settings:
+  source_image_path: "examples/images/uluaq_3.jpg"
+  classes:
+    - "semilunar knife"
+  thresholds:
+    box: 0.30
+    text: 0.20
+

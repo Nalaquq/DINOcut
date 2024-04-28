@@ -66,7 +66,7 @@ parser.add_argument(
     "-config_file",
     type=os.path.abspath,
     help="The location of the config.yaml file containing your albumentations configurations. If not selected synthetic.py will try to load config.py",
-    default="config.yaml",
+    default="synthetic_config.yaml",
 )
 args = parser.parse_args()
 
@@ -80,7 +80,7 @@ else:
 if args.config:
     yaml_path = args.config
 else:
-    yaml_path = "config.yaml"
+    yaml_path = "synthetic_config.yaml"
 
 
 def obj_list():
@@ -137,7 +137,6 @@ def obj_list():
         obj_dict[k]["images"] = files_imgs
         obj_dict[k]["masks"] = files_masks
     return obj_dict
-
 
 files_bg_imgs = sorted(os.listdir(os.path.join(PATH_MAIN, "background")))
 files_bg_imgs = [os.path.join(PATH_MAIN, "background", f) for f in files_bg_imgs]

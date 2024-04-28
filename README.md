@@ -106,7 +106,10 @@ https://github.com/IDEA-Research/GroundingDINO/issues/193
 
 
 
- # 📓 Resources # 
+ # 📓 Resources & Inspiration # 
+
+ [ImageBot](https://www.sciencedirect.com/science/article/pii/S2212827122002876?ref=pdf_download&fr=RR-2&rr=87b01ff6f8558bb9): A cut paste learn approach approach developed by Block et. al (2022). [Github Repo](https://github.com/FraunhoferIAO/Image-Bot)
+
 
 # 📂 Directory structure 📂
 

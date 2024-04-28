@@ -4,12 +4,13 @@ import supervision as sv
 import argparse
 from groundingdino.util.inference import Model
 from segment_anything import sam_model_registry, SamPredictor
-from typing import List, Tuple, Any
+from typing import List, Tuple, Dict, Any
 import cv2
 import numpy as np
 import math
 import cv2 as cv
 from numpy import ndarray
+import yaml
 
 parser = argparse.ArgumentParser(
     description="GroundingDINO and SAM for mask extraction."
@@ -81,34 +82,83 @@ def cuda_enabled() -> str:
         return "cpu"
 
 
-
 # Enable CUDA
 device = cuda_enabled()
 print(f"Using device: {device}")
 
-# establishes the path to the dino weights
+def load_configuration(yaml_path: str) -> Dict[str, Any]:
+    """
+    Load and parse configuration from a YAML file.
+
+    Parameters:
+    - yaml_path (str): The path to the YAML configuration file.
+
+    Returns:
+    - Dict[str, Any]: A dictionary with all configurations loaded from the YAML.
+
+    Raises:
+    - IOError: If there's an error opening or reading the YAML file.
+    - ValueError: If the YAML file is empty or improperly formatted.
+
+    Example:
+    Assume a YAML file 'config.yaml' with the following content:
+    ---
+    paths:
+      grounding_dino_checkpoint_path: "${d_weights}/groundingdino_swint_ogc.pth"
+      grounding_dino_config_path: "config/GroundingDINO_SwinT_OGC.py"
+    model_configs:
+      sam:
+        encoder_version: "vit_h"
+
+    Using the function:
+    >>> yaml_path = 'config.yaml'
+    >>> config = load_configuration(yaml_path)
+    >>> print(config['paths']['grounding_dino_checkpoint_path'])
+    /usr/local/d_weights/groundingdino_swint_ogc.pth
+    """
+    try:
+        # Load YAML content
+        with open(yaml_path, 'r') as file:
+            config = yaml.safe_load(file)
+
+        # Check if the YAML file was empty or improperly formatted
+        if config is None:
+            raise ValueError("The YAML file is empty or the contents are not in valid YAML format.")
+
+        # Resolve environment variables in paths if they are included
+        if 'paths' in config:
+            for key, value in config['paths'].items():
+                # Replace environment variables in paths with actual values
+                config['paths'][key] = os.path.expandvars(value)
+
+    except Exception as e:
+        raise IOError(f"An error occurred while reading or parsing the YAML file: {str(e)}")
+
+    return config
+
+# Example of using the function
+yaml_path = 'dino_sam_config.yaml'
+config = load_configuration(yaml_path)
+
+
 GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(
-    args.d_weights, "groundingdino_swint_ogc.pth"
+    args.d_weights, config['paths']['grounding_dino_checkpoint_path']
 )
+GROUNDING_DINO_CONFIG_PATH = (config['paths']['grounding_dino_config_path']
+)
+
+SAM_CHECKPOINT_PATH = os.path.join(args.s_weights, config['paths']['sam_checkpoint_path'])
+SAM_ENCODER_VERSION = config["model_configs"]["sam"]["encoder_version"]
+
 print(
     GROUNDING_DINO_CHECKPOINT_PATH,
     "; exist:",
     os.path.isfile(GROUNDING_DINO_CHECKPOINT_PATH),
 )
-
-GROUNDING_DINO_CONFIG_PATH = (
-    "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
-)
 print(
     GROUNDING_DINO_CONFIG_PATH, "; exist:", os.path.isfile(GROUNDING_DINO_CONFIG_PATH)
 )
-
-# estbalishes the path to sam weights
-SAM_CHECKPOINT_PATH = os.path.join(args.s_weights, "sam_vit_h_4b8939.pth")
 print(SAM_CHECKPOINT_PATH, "; exist:", os.path.isfile(SAM_CHECKPOINT_PATH))
-
-# The SAM Encoder version
-SAM_ENCODER_VERSION = "vit_h"
 
 grounding_dino_model = Model(
     model_config_path=GROUNDING_DINO_CONFIG_PATH,
@@ -124,6 +174,11 @@ CLASSES = ["semilunar knife"]
 BOX_TRESHOLD = 0.30
 TEXT_TRESHOLD = 0.20
 
+# Accessing variables from the config
+print("Grounding DINO Checkpoint Path:", config['paths']['grounding_dino_checkpoint_path'])
+print("SAM Checkpoint Path:", config['paths']['sam_checkpoint_path'])
+print("Box Threshold:", config['image_settings']['thresholds']['box'])
+print(config)
 
 def enhance_class_name(class_names: List[str]) -> List[str]:
     """
