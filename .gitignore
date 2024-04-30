@@ -12,3 +12,5 @@ dataset
 images 
 #Ignore Examples
 examples 
+#ignore .vscode
+.vscode
