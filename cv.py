@@ -6,7 +6,9 @@ from skimage.feature import hog
 from skimage import data, exposure
 from skimage.io import imread
 from skimage.color import rgb2gray
-from typing import Union
+from typing import Union, Optional
+from scipy import ndimage
+from skimage.io import imread
 
 
 path='examples/images'
@@ -26,7 +28,7 @@ print(random_img)
 os.chdir(path)
 # First image in db collection
 #random image 177
-file=random_img
+file="spongebob caveman meme.jpg"
 
 
 def load_image(file: str, grey: bool = False) -> np.ndarray:
@@ -63,6 +65,99 @@ def show_image (img: np.array, label:str) -> None:
 
 load_image(file)
 show_image(file, "Original Image. Press 0")
+
+
+def visualize_channels(image_path: str) -> Optional[None]:
+    """
+    Visualizes the blue, green, and red channels of an input image separately.
+
+    This function loads an image from a specified path, splits its color channels,
+    creates grayscale-like images where only one channel retains its information,
+    and displays these images alongside the original image.
+
+    Parameters:
+        image_path (str): The path to the image file to be visualized.
+
+    Returns:
+        None: This function displays the images directly and does not return anything.
+
+    Example usage:
+        # Make sure to replace "path/to/your/image.jpg" with an actual image path.
+        visualize_channels("path/to/your/image.jpg")
+    """
+    
+    # Load the image
+    image = cv.imread(image_path)
+    
+    if image is None:
+        print(f"Could not load image at {image_path}")
+        return
+    
+    # Separate the channels
+    blue, green, red = cv.split(image)
+
+    # Create images where only one channel retains its information
+    blue_image = cv.merge([blue, np.zeros_like(blue), np.zeros_like(blue)])
+    green_image = cv.merge([np.zeros_like(green), green, np.zeros_like(green)])
+    red_image = cv.merge([np.zeros_like(red), np.zeros_like(red), red])
+    
+    # Display the images
+    cv.imwrite("Original.jpg", image)
+    cv.imwrite("Blue Channel.jpg", blue_image)
+    cv.imwrite("Green Channel.jpg", green_image)
+    cv.imwrite("Red Channel.jpg", red_image)
+
+
+
+visualize_channels("spongebob caveman meme.jpg")
+
+
+
+
+
+def process_image_and_display(image_path: Union[str, bytes, "os.PathLike[str]"]):
+    """
+    Processes an image by applying Sobel filters to compute horizontal and vertical gradients, 
+    and displays these gradients alongside the original image and their magnitude.
+
+    Args:
+        image_path (Union[str, bytes, "os.PathLike[str]"]): The path to the input image, which can be 
+        a string, a bytes object, or an os.PathLike object representing the path.
+
+    Returns:
+        None: Displays the processed images in a matplotlib window.
+
+    Example:
+        >>> process_image_and_display("path/to/your/image.jpg")
+    """
+    # Load and convert the image to grayscale
+    image = imread(image_path, as_gray=True).astype('int32')
+    
+    # Apply Sobel filters
+    sobel_h = ndimage.sobel(image, axis=0)  # horizontal gradient
+    sobel_v = ndimage.sobel(image, axis=1)  # vertical gradient
+    
+    # Magnitude computation and normalization
+    magnitude = np.sqrt(sobel_h**2 + sobel_v**2)
+    magnitude *= 255.0 / np.max(magnitude)  # normalization
+
+    # Create subplots and display images
+    fig, axs = plt.subplots(2, 2, figsize=(8, 8))
+    plt.gray()  # show the filtered result in grayscale
+
+    axs[0, 0].imshow(image)
+    axs[0, 1].imshow(sobel_h)
+    axs[1, 0].imshow(sobel_v)
+    axs[1, 1].imshow(magnitude)
+
+    titles = ["Original", "Horizontal", "Vertical", "Magnitude"]
+    for i, ax in enumerate(axs.ravel()):
+        ax.set_title(titles[i])
+        ax.axis("off")
+
+    plt.show()
+
+process_image_and_display("spongebob caveman meme.jpg")
 
 #Harris Feature Matching
 img=cv.imread(file)
@@ -171,7 +266,7 @@ plt.imshow(img3, 'gray'),plt.show()
 ##Orb Detector
 
 img1 = cv.imread('spongebob caveman meme.jpg', cv.IMREAD_GRAYSCALE) # queryImage
-img2 = cv.imread('spongebob mocking meme.jpg', cv.IMREAD_GRAYSCALE) # trainImage
+img2 = cv.imread('beach spongebob caveman meme.png', cv.IMREAD_GRAYSCALE) # trainImage
 
 # Initiate SIFT detector
 orb = cv.ORB_create()
