@@ -198,7 +198,9 @@ img2 = cv.drawKeypoints(img, kp, None, color=(0, 255, 0), flags=0)
 plt.imshow(img2), plt.show()
 
 # HOG Approach using SciKit Learn
-image = cv.imread(file)
+
+#image = cv.imread(file, cv.IMREAD_COLOR)
+image = cv.imread("spongebob mocking meme.jpg")
 gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
 fd, hog_image = hog(
@@ -225,7 +227,7 @@ ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)
 ax2.set_title("Histogram of Oriented Gradients")
 plt.show()
 
-
+#FLAN Matcher
 MIN_MATCH_COUNT = 10
 img1 = cv.imread("spongebob caveman meme.jpg", cv.IMREAD_GRAYSCALE)  # queryImage
 img2 = cv.imread("spongebob mocking meme.jpg", cv.IMREAD_GRAYSCALE)  # trainImage
@@ -271,7 +273,7 @@ plt.imshow(img3, "gray"), plt.show()
 ##Orb Detector
 
 img1 = cv.imread("spongebob caveman meme.jpg", cv.IMREAD_GRAYSCALE)  # queryImage
-img2 = cv.imread("beach spongebob caveman meme.png", cv.IMREAD_GRAYSCALE)  # trainImage
+img2 = cv.imread("spongebob mocking meme.jpg", cv.IMREAD_GRAYSCALE)  # trainImage
 
 # Initiate SIFT detector
 orb = cv.ORB_create()
@@ -281,7 +283,8 @@ kp1, des1 = orb.detectAndCompute(img1, None)
 kp2, des2 = orb.detectAndCompute(img2, None)
 
 # FLANN parameters
-FLANN_INDEX_KDTREE = 0
+MIN_MATCH_COUNT = 1
+FLANN_INDEX_KDTREE = 1
 index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
 search_params = dict(checks=50)  # or pass empty dictionary
 
@@ -297,7 +300,7 @@ matchesMask = [[0, 0] for i in range(len(matches))]
 
 # ratio test as per Lowe's paper
 for i, (m, n) in enumerate(matches):
-    if m.distance < 0.7 * n.distance:
+    if m.distance < .25 * n.distance:
         matchesMask[i] = [1, 0]
 
 matches = flann.knnMatch(des1, des2, k=2)
@@ -328,3 +331,4 @@ else:
     )
 img3 = cv.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
 plt.imshow(img3, "gray"), plt.show()
+cv.imwrite("test.jpg", img3)

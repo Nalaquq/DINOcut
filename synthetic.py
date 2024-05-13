@@ -122,6 +122,9 @@ def obj_list():
     del obj_dict[1]
     temp_list = list(range(len(obj_dict)))
     obj_dict = dict(zip(temp_list, list(obj_dict.values())))
+    del obj_dict[1]
+    temp_list = list(range(len(obj_dict)))
+    obj_dict = dict(zip(temp_list, list(obj_dict.values())))
     for k, _ in obj_dict.items():
         folder_name = obj_dict[k]["folder"]
 
@@ -150,6 +153,12 @@ files_bg_noise_masks = [
     os.path.join(PATH_MAIN, "bg_noise", "masks", f) for f in files_bg_noise_masks
 ]
 
+classes=obj_list()
+print(classes.keys())
+# Deletes background images classes
+
+print(classes)
+print(classes.keys())
 
 def get_img_and_mask(img_path: str, mask_path: str) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -737,7 +746,7 @@ year = {2017}
 
         annotations_yolo.append(
             [
-                labels_comp[i] - 1,
+                labels_comp[i],
                 round(xc / comp_w, 5),
                 round(yc / comp_h, 5),
                 round(w / comp_w, 5),
@@ -746,7 +755,6 @@ year = {2017}
         )
 
     return annotations_yolo
-
 
 def generate_dataset(imgs_number: int, folder: str, split: str = "train") -> None:
     """

@@ -86,6 +86,7 @@ def cuda_enabled() -> str:
 device = cuda_enabled()
 print(f"Using device: {device}")
 
+
 def load_configuration(yaml_path: str) -> Dict[str, Any]:
     """
     Load and parse configuration from a YAML file.
@@ -118,36 +119,42 @@ def load_configuration(yaml_path: str) -> Dict[str, Any]:
     """
     try:
         # Load YAML content
-        with open(yaml_path, 'r') as file:
+        with open(yaml_path, "r") as file:
             config = yaml.safe_load(file)
 
         # Check if the YAML file was empty or improperly formatted
         if config is None:
-            raise ValueError("The YAML file is empty or the contents are not in valid YAML format.")
+            raise ValueError(
+                "The YAML file is empty or the contents are not in valid YAML format."
+            )
 
         # Resolve environment variables in paths if they are included
-        if 'paths' in config:
-            for key, value in config['paths'].items():
+        if "paths" in config:
+            for key, value in config["paths"].items():
                 # Replace environment variables in paths with actual values
-                config['paths'][key] = os.path.expandvars(value)
+                config["paths"][key] = os.path.expandvars(value)
 
     except Exception as e:
-        raise IOError(f"An error occurred while reading or parsing the YAML file: {str(e)}")
+        raise IOError(
+            f"An error occurred while reading or parsing the YAML file: {str(e)}"
+        )
 
     return config
 
+
 # Example of using the function
-yaml_path = 'dino_sam_config.yaml'
+yaml_path = "dino_sam_config.yaml"
 config = load_configuration(yaml_path)
 
 
 GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(
-    args.d_weights, config['paths']['grounding_dino_checkpoint_path']
+    args.d_weights, config["paths"]["grounding_dino_checkpoint_path"]
 )
-GROUNDING_DINO_CONFIG_PATH = (config['paths']['grounding_dino_config_path']
-)
+GROUNDING_DINO_CONFIG_PATH = config["paths"]["grounding_dino_config_path"]
 
-SAM_CHECKPOINT_PATH = os.path.join(args.s_weights, config['paths']['sam_checkpoint_path'])
+SAM_CHECKPOINT_PATH = os.path.join(
+    args.s_weights, config["paths"]["sam_checkpoint_path"]
+)
 SAM_ENCODER_VERSION = config["model_configs"]["sam"]["encoder_version"]
 
 print(
@@ -175,10 +182,13 @@ BOX_TRESHOLD = 0.30
 TEXT_TRESHOLD = 0.20
 
 # Accessing variables from the config
-print("Grounding DINO Checkpoint Path:", config['paths']['grounding_dino_checkpoint_path'])
-print("SAM Checkpoint Path:", config['paths']['sam_checkpoint_path'])
-print("Box Threshold:", config['image_settings']['thresholds']['box'])
+print(
+    "Grounding DINO Checkpoint Path:", config["paths"]["grounding_dino_checkpoint_path"]
+)
+print("SAM Checkpoint Path:", config["paths"]["sam_checkpoint_path"])
+print("Box Threshold:", config["image_settings"]["thresholds"]["box"])
 print(config)
+
 
 def enhance_class_name(class_names: List[str]) -> List[str]:
     """
@@ -201,9 +211,9 @@ def enhance_class_name(class_names: List[str]) -> List[str]:
         an 's' at the end. This is useful for creating labels or descriptions that need to
         refer to multiple instances of each class.
     Citation:
-         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+         Function modified from 2024 Grounded SAM Release by Ren et. al,
             @misc{ren2024grounded,
-                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks},
                     author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
                     year={2024},
                     eprint={2401.14159},
@@ -247,9 +257,9 @@ def dino_detection(
         detections = dino_detection(image, class_names, box_threshold, text_threshold)
         print(detections)
     Citation:
-         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+         Function modified from 2024 Grounded SAM Release by Ren et. al,
             @misc{ren2024grounded,
-                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks},
                     author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
                     year={2024},
                     eprint={2401.14159},
@@ -297,9 +307,9 @@ def dino_display_image(
         CLASSES = ['cat', 'dog']
         dino_display_image(image, detections, CLASSES)
     Citation:
-         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+         Function modified from 2024 Grounded SAM Release by Ren et. al,
             @misc{ren2024grounded,
-                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks},
                     author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
                     year={2024},
                     eprint={2401.14159},
@@ -358,9 +368,9 @@ def show_sam_detections(
         CLASSES = ['cat', 'dog', 'bird']
         show_sam_detections(image, detections, CLASSES)
     Citation:
-         Function modified from 2024 Grounded SAM Release by Ren et. al, 
+         Function modified from 2024 Grounded SAM Release by Ren et. al,
             @misc{ren2024grounded,
-                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks}, 
+                    title={Grounded SAM: Assembling Open-World Models for Diverse Visual Tasks},
                     author={Tianhe Ren and Shilong Liu and Ailing Zeng and Jing Lin and Kunchang Li and He Cao and Jiayu Chen and Xinyu Huang and Yukang Chen and Feng Yan and Zhaoyang Zeng and Hao Zhang and Feng Li and Jie Yang and Hongyang Li and Qing Jiang and Lei Zhang},
                     year={2024},
                     eprint={2401.14159},
