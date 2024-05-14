@@ -10,8 +10,10 @@ from datetime import datetime
 import yaml
 import xml.etree.ElementTree as ET
 from PIL import Image
-from typing import Dict, List
+from typing import Dict, List, Optional, Any
 import json
+from collections import OrderedDict
+
 
 parser = argparse.ArgumentParser(
     description="Generates Synthetic Datasets for Object Detection."
@@ -858,7 +860,6 @@ year = {2017}
         "Annotations are stored in '{}'".format(os.path.join(folder, split, "labels"))
     )
 
-
 def mkdir() -> None:
     """
     Creates directories for dataset storage and manages file system navigation.
@@ -1000,8 +1001,6 @@ def yolo_to_voc(yolo_dir: str, img_dir: str, class_names: List[str], output_dir:
             output_file = os.path.join(output_dir, filename.replace('.txt', '.xml'))
             tree.write(output_file)
 
-
-
 def yolo_to_coco(yolo_dir: str, img_dir: str, class_names: List[str], output_file: str) -> None:
     """
     Converts YOLO annotations to COCO format for all files in a directory.
@@ -1115,6 +1114,61 @@ def test_train_val_split() -> None:
     print(test_set)
     return test_set, training_set, validation_set
 
+def get_classes(data: Dict[int, Dict[str, int]]) -> List[str]:
+    """
+    Extracts the values of the 'folder' key from each sub-dictionary in the input dictionary.
+
+    Args:
+        data (Dict[int, Dict[str, int]]): A dictionary where each key maps to a dictionary 
+                                          containing 'folder', 'longest_min', and 'longest_max' keys.
+
+    Returns:
+        List[str]: A list of values from the 'folder' key in each sub-dictionary.
+    """
+    return [sub_dict['folder'] for sub_dict in data.values()]
+
+def generate_directory_structure(root_dir: str) -> Dict[str, Any]:
+    """
+    Generates a nested dictionary representing the directory structure.
+
+    Args:
+        root_dir (str): The root directory from which to generate the structure.
+
+    Returns:
+        Dict[str, Any]: A nested dictionary representing the directory structure.
+    """
+    directory_structure = {}
+
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        # Split the path into components
+        parts = dirpath.split(os.sep)
+        # Navigate the nested dictionary to the current directory
+        current_level = directory_structure
+        for part in parts:
+            if part not in current_level:
+                current_level[part] = {}
+            current_level = current_level[part]
+
+    return directory_structure
+
+def get_path_from_structure(structure: Dict[str, Any], *path: str) -> Optional[str]:
+    """
+    Retrieves the relative path from the directory structure.
+
+    Args:
+        structure (Dict[str, Any]): The nested dictionary representing the directory structure.
+        path (str): The sequence of keys representing the desired path.
+
+    Returns:
+        Optional[str]: The relative path as a string if found, otherwise None.
+    """
+    current_level = structure
+    for part in path:
+        if part in current_level:
+            current_level = current_level[part]
+        else:
+            return None
+    return os.path.join(*path) if isinstance(current_level, dict) else None
 
 def generate() -> None:
     """
@@ -1144,25 +1198,85 @@ def generate() -> None:
     """
     obj_list()
     mkdir()
+    # create the test, train, and validation split
     ttv = test_train_val_split()
-    if args.format == 'yolo':
-        print("\n Saving labels in YOLO format \n")
-        pass
-    elif args.format=='voc': 
-        print("\n Saving labels in VOC format \n")
-    elif args.format=='coco':
-        print("\n Saving labels in COCO format\n")
-    else: 
-        pass
+    #generate the test, train, and validation datasets
     generate_dataset(ttv[0], folder="dataset", split="test")
     generate_dataset(ttv[2], folder="dataset", split="val")
     generate_dataset(ttv[1], folder="dataset", split="train")
 
+#generate()
+
+if args.format == 'yolo':
+        print("\n Saving labels in YOLO format \n")
+        print ("\n Labels have been saved. A classes.yaml file has been saved in /dataset")
+
+elif args.format=='voc': 
+        print("\n Saving labels in VOC format \n")
+        print ("\n Labels have been saved. A labelmap.txt file has been saved in /dataset")
+elif args.format=='coco':
+        print("\n Saving labels in COCO format\n")
+        print ("\n Labels have been saved. An annotation file has been saved in /dataset") 
+else: 
+    pass
 
 
 
 
-generate()
+# Generate the directory structure for the dataset directory
+root_directory = "dataset"
+directory_structure = generate_directory_structure(root_directory)
+
+# Retrieve the paths
+train_path = get_path_from_structure(directory_structure, "dataset", "train")
+train_images_path = get_path_from_structure(directory_structure, "dataset", "train", "images")
+train_labels_path = get_path_from_structure(directory_structure, "dataset", "train", "labels")
+test_path = get_path_from_structure(directory_structure, "dataset", "test")
+test_images_path = get_path_from_structure(directory_structure, "dataset", "test", "images")
+test_labels_path = get_path_from_structure(directory_structure, "dataset", "test", "labels")
+val_path = get_path_from_structure(directory_structure, "dataset", "val")
+val_images_path = get_path_from_structure(directory_structure, "dataset", "val", "images")
+val_labels_path = get_path_from_structure(directory_structure, "dataset", "val", "labels")
+
+# Example function definitions for obj_list and get_classes
+
+# Create a list of classes for COCO generation
+data = obj_list()
+class_names = get_classes(data)
+class_number = len(class_names)
+
+# Define the content of the classes.yaml file
+classes_yaml_content = OrderedDict([
+    ("path", os.path.abspath(root_directory)),
+    ("train", os.path.abspath(train_path)),
+    ("test", os.path.abspath(test_path)),
+    ("val", os.path.abspath(val_path)),
+    ("nc", class_number),
+    ("names", class_names)
+])
+
+# Custom YAML representer for OrderedDict to ensure correct order
+class NoAliasDumper(yaml.SafeDumper):
+    def ignore_aliases(self, data):
+        return True
+
+def ordered_dict_representer(dumper, data):
+    return dumper.represent_dict(data.items())
+
+yaml.add_representer(OrderedDict, ordered_dict_representer, Dumper=NoAliasDumper)
+
+# Path to save the YAML file
+yaml_file_path = os.path.join(root_directory, "classes.yaml")
+
+# Save the content to classes.yaml
+with open(yaml_file_path, 'w') as yaml_file:
+    yaml.dump(classes_yaml_content, yaml_file, Dumper=NoAliasDumper, default_flow_style=False)
+
+# Print results
+print(f"YAML file saved to {yaml_file_path}")
+print(class_names, class_number)
+
+
 '''
 # Example usage
 yolo_dir = 'path/to/yolo_annotations'
