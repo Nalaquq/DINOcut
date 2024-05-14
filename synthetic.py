@@ -30,7 +30,7 @@ parser.add_argument(
     "-num",
     type=int,
     help="The number of images to be generated. Images will be generated according to a 80/20/20 Train/Test/Val split",
-    default=1000,
+    default=20,
 )
 parser.add_argument(
     "-io",
@@ -910,7 +910,13 @@ def mkdir() -> None:
                     if name.endswith(".jpg"):
                         selected_files = os.path.join(root, name)
                         os.remove(selected_files)
+                    if name.endswith(".xml"):
+                        selected_files = os.path.join(root, name)
+                        os.remove(selected_files)
                     if name.endswith(".txt"):
+                        selected_files = os.path.join(root, name)
+                        os.remove(selected_files)
+                    if  name.endswith(".json"):
                         selected_files = os.path.join(root, name)
                         os.remove(selected_files)
             print("\n{} files were deleted.".format(len(total_number)))
@@ -919,7 +925,7 @@ def mkdir() -> None:
                 for name in files:
                     if name.endswith(".jpg"):
                         selected_files = os.path.join(root, name)
-                    if name.endswith(".txt"):
+                    if name.endswith(".txt" or ".xml" or ".json"):
                         selected_files = os.path.join(root, name)
             print("\n\t {} files were deleted.".format(len(total_number)))
             print(
@@ -929,149 +935,6 @@ def mkdir() -> None:
             )
             print("\n Beginning Data Generation\n")
             pass
-
-
-def yolo_to_voc(
-    yolo_dir: str, img_dir: str, class_names: List[str], output_dir: str
-) -> None:
-    """
-    Converts YOLO annotations to VOC format for all files in a directory.
-
-    Args:
-        yolo_dir (str): Directory containing YOLO annotation files.
-        img_dir (str): Directory containing corresponding images.
-        class_names (List[str]): List of class names.
-        output_dir (str): Directory to save VOC annotations.
-    """
-    os.makedirs(output_dir, exist_ok=True)
-
-    for filename in os.listdir(yolo_dir):
-        if filename.endswith(".txt"):
-            yolo_annotation_path = os.path.join(yolo_dir, filename)
-            img_filename = filename.replace(".txt", ".jpg")
-            img_path = os.path.join(img_dir, img_filename)
-
-            img = Image.open(img_path)
-            img_width, img_height = img.size
-
-            with open(yolo_annotation_path, "r") as f:
-                lines = f.readlines()
-
-            voc_annotation = ET.Element("annotation")
-            folder = ET.SubElement(voc_annotation, "folder")
-            folder.text = "images"
-            filename_tag = ET.SubElement(voc_annotation, "filename")
-            filename_tag.text = img_filename
-            size = ET.SubElement(voc_annotation, "size")
-            width = ET.SubElement(size, "width")
-            width.text = str(img_width)
-            height = ET.SubElement(size, "height")
-            height.text = str(img_height)
-
-            for line in lines:
-                parts = line.strip().split()
-                class_id = int(parts[0])
-                x_center = float(parts[1])
-                y_center = float(parts[2])
-                width = float(parts[3])
-                height = float(parts[4])
-
-                xmin = int((x_center - width / 2) * img_width)
-                ymin = int((y_center - height / 2) * img_height)
-                xmax = int((x_center + width / 2) * img_width)
-                ymax = int((y_center + height / 2) * img_height)
-
-                obj = ET.SubElement(voc_annotation, "object")
-                name = ET.SubElement(obj, "name")
-                name.text = class_names[class_id]
-                bndbox = ET.SubElement(obj, "bndbox")
-                xmin_tag = ET.SubElement(bndbox, "xmin")
-                xmin_tag.text = str(xmin)
-                ymin_tag = ET.SubElement(bndbox, "ymin")
-                ymin_tag.text = str(ymin)
-                xmax_tag = ET.SubElement(bndbox, "xmax")
-                xmax_tag.text = str(xmax)
-                ymax_tag = ET.SubElement(bndbox, "ymax")
-                ymax_tag.text = str(ymax)
-
-            tree = ET.ElementTree(voc_annotation)
-            output_file = os.path.join(output_dir, filename.replace(".txt", ".xml"))
-            tree.write(output_file)
-
-
-def yolo_to_coco(
-    yolo_dir: str, img_dir: str, class_names: List[str], output_file: str
-) -> None:
-    """
-    Converts YOLO annotations to COCO format for all files in a directory.
-
-    Args:
-        yolo_dir (str): Directory containing YOLO annotation files.
-        img_dir (str): Directory containing corresponding images.
-        class_names (List[str]): List of class names.
-        output_file (str): Path to save the COCO annotations JSON file.
-    """
-    coco_annotation = {
-        "images": [],
-        "annotations": [],
-        "categories": [{"id": i, "name": name} for i, name in enumerate(class_names)],
-    }
-
-    annotation_id = 1
-    image_id = 1
-
-    for filename in os.listdir(yolo_dir):
-        if filename.endswith(".txt"):
-            yolo_annotation_path = os.path.join(yolo_dir, filename)
-            img_filename = filename.replace(".txt", ".jpg")
-            img_path = os.path.join(img_dir, img_filename)
-
-            img = Image.open(img_path)
-            img_width, img_height = img.size
-
-            coco_annotation["images"].append(
-                {
-                    "id": image_id,
-                    "width": img_width,
-                    "height": img_height,
-                    "file_name": img_filename,
-                }
-            )
-
-            with open(yolo_annotation_path, "r") as f:
-                lines = f.readlines()
-
-            for line in lines:
-                parts = line.strip().split()
-                class_id = int(parts[0])
-                x_center = float(parts[1])
-                y_center = float(parts[2])
-                width = float(parts[3])
-                height = float(parts[4])
-
-                bbox = [
-                    (x_center - width / 2) * img_width,
-                    (y_center - height / 2) * img_height,
-                    width * img_width,
-                    height * img_height,
-                ]
-
-                annotation = {
-                    "id": annotation_id,
-                    "image_id": image_id,
-                    "category_id": class_id,
-                    "bbox": bbox,
-                    "area": bbox[2] * bbox[3],
-                    "iscrowd": 0,
-                }
-                coco_annotation["annotations"].append(annotation)
-                annotation_id += 1
-
-            image_id += 1
-
-    with open(output_file, "w") as f:
-        json.dump(coco_annotation, f, indent=4)
-
 
 def test_train_val_split() -> None:
     """
@@ -1175,6 +1038,144 @@ def get_path_from_structure(structure: Dict[str, Any], *path: str) -> Optional[s
     return os.path.join(*path) if isinstance(current_level, dict) else None
 
 
+def convert_yolo_to_voc(yolo_label_path: str, voc_label_path: str, image_width: int, image_height: int):
+    """
+    Converts a YOLO label to VOC format.
+    
+    Args:
+        yolo_label_path (str): Path to the YOLO label file.
+        voc_label_path (str): Path to save the VOC label file.
+        image_width (int): Width of the image.
+        image_height (int): Height of the image.
+    """
+    annotation = ET.Element("annotation")
+    
+    with open(yolo_label_path, 'r') as file:
+        for line in file:
+            class_id, x_center, y_center, width, height = map(float, line.strip().split())
+            
+            obj = ET.SubElement(annotation, "object")
+            ET.SubElement(obj, "name").text = str(int(class_id))  # Replace with class name if available
+            ET.SubElement(obj, "pose").text = "Unspecified"
+            ET.SubElement(obj, "truncated").text = "0"
+            ET.SubElement(obj, "difficult").text = "0"
+            
+            bbox = ET.SubElement(obj, "bndbox")
+            x_min = int((x_center - width / 2) * image_width)
+            y_min = int((y_center - height / 2) * image_height)
+            x_max = int((x_center + width / 2) * image_width)
+            y_max = int((y_center + height / 2) * image_height)
+            
+            ET.SubElement(bbox, "xmin").text = str(x_min)
+            ET.SubElement(bbox, "ymin").text = str(y_min)
+            ET.SubElement(bbox, "xmax").text = str(x_max)
+            ET.SubElement(bbox, "ymax").text = str(y_max)
+    
+    tree = ET.ElementTree(annotation)
+    tree.write(voc_label_path)
+
+def convert_yolo_to_coco(yolo_label_path: str, coco_annotations: List[Dict[str, Any]], image_id: int, category_id: int, image_width: int, image_height: int):
+    """
+    Converts a YOLO label to COCO format and appends it to the provided COCO annotations list.
+    
+    Args:
+        yolo_label_path (str): Path to the YOLO label file.
+        coco_annotations (List[Dict[str, Any]]): List to append the COCO annotations to.
+        image_id (int): ID of the image.
+        category_id (int): ID of the category.
+        image_width (int): Width of the image.
+        image_height (int): Height of the image.
+    """
+    with open(yolo_label_path, 'r') as file:
+        for line in file:
+            class_id, x_center, y_center, width, height = map(float, line.strip().split())
+            x_center *= image_width
+            y_center *= image_height
+            width *= image_width
+            height *= image_height
+            x_min = x_center - width / 2
+            y_min = y_center - height / 2
+            
+            annotation = {
+                "image_id": image_id,
+                "category_id": category_id,
+                "bbox": [x_min, y_min, width, height],
+                "area": width * height,
+                "iscrowd": 0
+            }
+            coco_annotations.append(annotation)
+
+def convert_labels(root_dir: str, conversion_type: str):
+    """
+    Converts labels from YOLO format to VOC or COCO format and deletes the old YOLO labels.
+    
+    Args:
+        root_dir (str): The root directory containing 'train', 'test', and 'val' subdirectories.
+        conversion_type (str): The target format for conversion ('voc' or 'coco').
+    """
+    subsets = ['train', 'test', 'val']
+    image_ext = '.jpg'  # Assuming images are in .jpg format, change if necessary
+    
+    for subset in subsets:
+        labels_dir = os.path.join(root_dir, subset, 'labels')
+        images_dir = os.path.join(root_dir, subset, 'images')
+        new_labels_dir = os.path.join(root_dir, subset, 'labels')
+        
+        # Create the new labels directory if it doesn't exist
+        os.makedirs(new_labels_dir, exist_ok=True)
+        
+        if conversion_type == 'coco':
+            coco_annotations = []
+            coco_images = []
+            coco_categories = [{"id": 1, "name": "class_name"}]  # Replace with actual category names and IDs
+            
+        for label_file in os.listdir(labels_dir):
+            if label_file.endswith('.txt'):  # Assuming YOLO labels are in .txt format
+                yolo_label_path = os.path.join(labels_dir, label_file)
+                image_name = label_file.replace('.txt', image_ext)
+                image_path = os.path.join(images_dir, image_name)
+                
+                # Get image dimensions
+                if os.path.exists(image_path):
+                    with open(image_path, 'rb') as img_file:
+                        from PIL import Image
+                        with Image.open(img_file) as img:
+                            image_width, image_height = img.size
+                else:
+                    continue
+                
+                new_label_path = os.path.join(new_labels_dir, label_file.replace('.txt', '.xml' if conversion_type == 'voc' else '.json'))
+                
+                if conversion_type == 'voc':
+                    convert_yolo_to_voc(yolo_label_path, new_label_path, image_width, image_height)
+                elif conversion_type == 'coco':
+                    image_id = len(coco_images) + 1
+                    category_id = 1  # Replace with actual category ID lookup if necessary
+                    coco_images.append({
+                        "id": image_id,
+                        "file_name": image_name,
+                        "width": image_width,
+                        "height": image_height
+                    })
+                    convert_yolo_to_coco(yolo_label_path, coco_annotations, image_id, category_id, image_width, image_height)
+                
+                # Delete the old YOLO label
+                os.remove(yolo_label_path)
+        
+        if conversion_type == 'coco':
+            coco_output = {
+                "images": coco_images,
+                "annotations": coco_annotations,
+                "categories": coco_categories
+            }
+            coco_output_path = os.path.join(new_labels_dir, 'annotations.json')
+            with open(coco_output_path, 'w') as json_file:
+                json.dump(coco_output, json_file, indent=4)
+        
+        # Optionally, remove the old labels directory if it's empty
+        if not os.listdir(labels_dir):
+            os.rmdir(labels_dir)
+
 def generate() -> None:
     """
     Orchestrates the generation of a dataset by executing a sequence of operations.
@@ -1211,7 +1212,7 @@ def generate() -> None:
     generate_dataset(ttv[1], folder="dataset", split="train")
 
 
-# generate()
+generate()
 
 
 # Generate the directory structure for the dataset directory
@@ -1282,33 +1283,23 @@ if args.format == "yolo":
     # Print results
     print(f"YAML file with name classes.yaml saved to {yaml_file_path}")
     print(class_names, class_number)
-
 elif args.format == "voc":
     print("\n Saving labels in VOC format \n")
+    root_directory = 'dataset'
+    conversion_type = 'voc'  
+    convert_labels(root_directory, conversion_type)
     print("\n Labels have been saved. A labelmap.txt file has been saved in /dataset")
 elif args.format == "coco":
     print("\n Saving labels in COCO format\n")
+    root_directory = 'dataset'
+    conversion_type = 'coco'
+    convert_labels(root_directory, conversion_type)
     print("\n Labels have been saved. An annotation file has been saved in /dataset")
 else:
     pass
 
 
-"""
-# Example usage
-yolo_dir = 'path/to/yolo_annotations'
-img_dir = 'path/to/images'
-class_names = ['class1', 'class2', 'class3']
-output_file = 'path/to/coco_annotations.json'
-yolo_to_coco(yolo_dir, img_dir, class_names, output_file)
-"""
-
-"""
-# Example usage
-yolo_dir = 'dataset/test/labels'
-img_dir = 'dataset/test/images'
-class_names = ['caveg', 'ulus', 'tops', 'endblades']
-output_dir = 'dataset/test/labels'
-yolo_to_voc(yolo_dir, img_dir, class_names, output_dir)
 
 
-"""
+
+
