@@ -1288,18 +1288,26 @@ elif args.format == "voc":
     root_directory = 'dataset'
     conversion_type = 'voc'  
     convert_labels(root_directory, conversion_type)
+    try: 
+        os.remove("classes.yaml")
+    except: 
+        pass
     print("\n Labels have been saved. A labelmap.txt file has been saved in /dataset")
 elif args.format == "coco":
     print("\n Saving labels in COCO format\n")
     root_directory = 'dataset'
     conversion_type = 'coco'
     convert_labels(root_directory, conversion_type)
+    try: 
+        os.remove("classes.yaml")
+    except: 
+        pass
     print("\n Labels have been saved. An annotation file has been saved in /dataset")
 else:
     pass
 
 
-
+'''still need to create the labelmap.txt file and the COCO annotation file. Also need to ensure that classes.yaml is removed by debugging'''
 
 
 
