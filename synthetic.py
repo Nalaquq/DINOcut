@@ -1292,6 +1292,11 @@ elif args.format == "voc":
         os.remove("classes.yaml")
     except: 
         pass
+    labelmap_path = os.path.join(root_directory, "labelmap.txt")
+     with open(labelmap_path, "w") as f:
+        for i, name in enumerate(class_names):
+            f.write(f"id: {i + 1}\n")
+            f.write(f"name: \"{name}\"\n")
     print("\n Labels have been saved. A labelmap.txt file has been saved in /dataset")
 elif args.format == "coco":
     print("\n Saving labels in COCO format\n")
@@ -1300,6 +1305,7 @@ elif args.format == "coco":
     convert_labels(root_directory, conversion_type)
     try: 
         os.remove("classes.yaml")
+        os.remove("labelmap.txt")
     except: 
         pass
     print("\n Labels have been saved. An annotation file has been saved in /dataset")
@@ -1307,7 +1313,7 @@ else:
     pass
 
 
-'''still need to create the labelmap.txt file and the COCO annotation file. Also need to ensure that classes.yaml is removed by debugging'''
+'''still need to debugg labelmap.txt Also need to ensure that classes.yaml is removed by debugging'''
 
 
 
