@@ -152,7 +152,6 @@ def obj_list():
                 folder_name = data[sorted_keys[index]]['folder']
                 file.write(f"{folder_name}\n")
     create_yolo_class_file(obj_dict)
-    print(obj_dict)
     for k, _ in obj_dict.items():
         folder_name = obj_dict[k]["folder"]
 
@@ -180,8 +179,6 @@ files_bg_noise_masks = sorted(os.listdir(os.path.join(PATH_MAIN, "bg_noise", "ma
 files_bg_noise_masks = [
     os.path.join(PATH_MAIN, "bg_noise", "masks", f) for f in files_bg_noise_masks
 ]
-
-
 
 def get_img_and_mask(img_path: str, mask_path: str) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -938,84 +935,6 @@ def mkdir() -> None:
             print("\n Beginning Data Generation\n")
             pass
 
-
-def test_train_val_split() -> None:
-    """
-    Splits a dataset into training, testing, and validation sets based on a predefined ratio.
-
-    This function determines the number of items in each subset of the dataset (training, testing,
-    validation) based on the total number of items specified by the global variable `args.n`. It follows
-    an 80/10/10 split ratio. If the total number of items is 10 or fewer, the function defaults to using
-    1000 items for the training set and evenly divides the remaining 200 items between the test and
-    validation sets.
-
-    The function prints the size of each subset to the console.
-
-    Returns:
-        tuple: A tuple containing the number of items in the test set, training set, and validation set
-        in that order.
-
-    Raises:
-        AttributeError: If `args.n` is not defined globally before calling this function.
-
-    Note:
-        The function assumes an 80/10/10 split for datasets larger than 10 items. Ensure that `args.n`
-        is defined and is an integer representing the total number of images or items in the dataset
-        before invoking this function.
-    """
-    if args.n <= 10:
-        print(
-            "At least 10 images are needed for an 80/10/10 dataset. Using the default value of 1000 training images."
-        )
-        training_set = 800
-        test_set = 100
-        validation_set = 100
-    else:
-        total_dataset = args.n
-        test_set = int((0.10 * total_dataset) // 1)
-        validation_set = int((0.10 * total_dataset) // 1)
-        training_set = int((0.80 * total_dataset) // 1)
-        print(
-            f"\n {total_dataset} images and labels will be split into a 80/10/10 training/test/validation set containing: \n {training_set} training images \n {test_set} test images \n {validation_set} validation images."
-        )
-    print(test_set)
-    return test_set, training_set, validation_set
-
-
-def generate() -> None:
-    """
-    Orchestrates the generation of a dataset by executing a sequence of operations.
-
-    This function performs the following tasks in sequence:
-    1. Calls `obj_list` to process object listings, assuming it prepares or manipulates
-       some required data or structures.
-    2. Calls `mkdir` to presumably create directories needed for dataset storage.
-    3. Splits the dataset into training, testing, and validation sets using the `test_train_val_split` function,
-       capturing the sizes of each split.
-    4. Generates the actual dataset files for the test, validation, and training sets by calling
-       `generate_dataset` with the respective sizes and designated folders.
-
-    The function relies on external definitions and side effects from `obj_list`, `mkdir`, and `generate_dataset`.
-    These functions are expected to be implemented properly and accessible globally for `generate` to function
-    correctly.
-
-    Raises:
-        Exception: If any called function (`obj_list`, `mkdir`, `test_train_val_split`, `generate_dataset`)
-                   fails, the exception will be propagated upward, detailing the cause of the failure.
-
-    Note:
-        The function assumes all directory paths and other necessary environmental settings are correctly
-        configured before execution. Errors related to environment misconfigurations or missing resources
-        will not be handled within this function.
-    """
-    obj_list()
-    mkdir()
-    ttv = test_train_val_split()
-    generate_dataset(ttv[0], folder="dataset", split="test")
-    generate_dataset(ttv[2], folder="dataset", split="val")
-    generate_dataset(ttv[1], folder="dataset", split="train")
-
-
 def yolo_to_voc(yolo_dir: str, img_dir: str, class_names: List[str], output_dir: str) -> None:
     """
     Converts YOLO annotations to VOC format for all files in a directory.
@@ -1153,6 +1072,95 @@ def yolo_to_coco(yolo_dir: str, img_dir: str, class_names: List[str], output_fil
     
     with open(output_file, 'w') as f:
         json.dump(coco_annotation, f, indent=4)
+
+def test_train_val_split() -> None:
+    """
+    Splits a dataset into training, testing, and validation sets based on a predefined ratio.
+
+    This function determines the number of items in each subset of the dataset (training, testing,
+    validation) based on the total number of items specified by the global variable `args.n`. It follows
+    an 80/10/10 split ratio. If the total number of items is 10 or fewer, the function defaults to using
+    1000 items for the training set and evenly divides the remaining 200 items between the test and
+    validation sets.
+
+    The function prints the size of each subset to the console.
+
+    Returns:
+        tuple: A tuple containing the number of items in the test set, training set, and validation set
+        in that order.
+
+    Raises:
+        AttributeError: If `args.n` is not defined globally before calling this function.
+
+    Note:
+        The function assumes an 80/10/10 split for datasets larger than 10 items. Ensure that `args.n`
+        is defined and is an integer representing the total number of images or items in the dataset
+        before invoking this function.
+    """
+    if args.n <= 10:
+        print(
+            "At least 10 images are needed for an 80/10/10 dataset. Using the default value of 1000 training images."
+        )
+        training_set = 800
+        test_set = 100
+        validation_set = 100
+    else:
+        total_dataset = args.n
+        test_set = int((0.10 * total_dataset) // 1)
+        validation_set = int((0.10 * total_dataset) // 1)
+        training_set = int((0.80 * total_dataset) // 1)
+        print(
+            f"\n {total_dataset} images and labels will be split into a 80/10/10 training/test/validation set containing: \n {training_set} training images \n {test_set} test images \n {validation_set} validation images."
+        )
+    print(test_set)
+    return test_set, training_set, validation_set
+
+
+def generate() -> None:
+    """
+    Orchestrates the generation of a dataset by executing a sequence of operations.
+
+    This function performs the following tasks in sequence:
+    1. Calls `obj_list` to process object listings, assuming it prepares or manipulates
+       some required data or structures.
+    2. Calls `mkdir` to presumably create directories needed for dataset storage.
+    3. Splits the dataset into training, testing, and validation sets using the `test_train_val_split` function,
+       capturing the sizes of each split.
+    4. Generates the actual dataset files for the test, validation, and training sets by calling
+       `generate_dataset` with the respective sizes and designated folders.
+
+    The function relies on external definitions and side effects from `obj_list`, `mkdir`, and `generate_dataset`.
+    These functions are expected to be implemented properly and accessible globally for `generate` to function
+    correctly.
+
+    Raises:
+        Exception: If any called function (`obj_list`, `mkdir`, `test_train_val_split`, `generate_dataset`)
+                   fails, the exception will be propagated upward, detailing the cause of the failure.
+
+    Note:
+        The function assumes all directory paths and other necessary environmental settings are correctly
+        configured before execution. Errors related to environment misconfigurations or missing resources
+        will not be handled within this function.
+    """
+    obj_list()
+    mkdir()
+    ttv = test_train_val_split()
+    if args.format == 'yolo':
+        print("\n Saving labels in YOLO format \n")
+        pass
+    elif args.format=='voc': 
+        print("\n Saving labels in VOC format \n")
+    elif args.format=='coco':
+        print("\n Saving labels in COCO format\n")
+    else: 
+        pass
+    generate_dataset(ttv[0], folder="dataset", split="test")
+    generate_dataset(ttv[2], folder="dataset", split="val")
+    generate_dataset(ttv[1], folder="dataset", split="train")
+
+
+
+
 
 generate()
 '''
