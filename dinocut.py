@@ -143,7 +143,7 @@ def load_configuration(yaml_path: str) -> Dict[str, Any]:
 
 
 # Example of using the function
-yaml_path = "dino_sam_config.yaml"
+yaml_path = "dinocut_config.yaml"
 config = load_configuration(yaml_path)
 
 
