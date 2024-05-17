@@ -11,7 +11,11 @@ import math
 import cv2 as cv
 from numpy import ndarray
 import yaml
+from tqdm import tqdm
+import time 
+from colorama import init, Fore, Back, Style
 
+init()
 parser = argparse.ArgumentParser(
     description="GroundingDINO and SAM for mask extraction."
 )
@@ -45,15 +49,14 @@ args = parser.parse_args()
 
 if args.src:
     PATH_MAIN = args.src
-    print(
+    print(Fore.RED +
         f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.py -h to learn more.\n"
     )
 else:
     PATH_MAIN = os.path.abspath("images")
-    print(
+    print(Back.GREEN +
         f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more.\n"
     )
-
 
 def cuda_enabled() -> str:
     """
@@ -68,23 +71,41 @@ def cuda_enabled() -> str:
         it advises checking the CUDA installation.
     """
     try:
-        if torch.cuda.is_available():
-            print("CUDA is available.")
-            print(f"Number of CUDA devices: {torch.cuda.device_count()}")
-            print(f"Current CUDA device index: {torch.cuda.current_device()}")
-            return "cuda"
-        else:
-            print("CUDA is not available. Using CPU instead.")
-            return "cpu"
+        with tqdm(total=3, desc=Fore.BLUE + "Checking CUDA availability") as pbar:
+            if torch.cuda.is_available():
+                pbar.set_postfix(step=Fore.BLUE+"Checking if CUDA is available")
+                time.sleep(1)  # Simulate time delay
+                pbar.update(1)
+
+                pbar.set_postfix(step=Fore.BLUE+"Counting CUDA devices")
+                device_count = torch.cuda.device_count()
+                time.sleep(1)  # Simulate time delay
+                pbar.update(1)
+
+                pbar.set_postfix(step=Fore.BLUE+"Getting current CUDA device index")
+                current_device = torch.cuda.current_device()
+                time.sleep(1)  # Simulate time delay
+                pbar.update(1)
+
+                print(Fore.GREEN + "CUDA is available.")
+                print(Fore.GREEN + f"Number of CUDA devices: {device_count}")
+                print(Fore.GREEN + f"Current CUDA device index: {current_device}")
+                return "cuda"
+            else:
+                pbar.set_postfix(step="CUDA not available, using CPU")
+                time.sleep(1)  # Simulate time delay
+                pbar.update(1)
+
+                print(Fore.RED + "CUDA is not available. Using CPU instead.")
+                return "cpu"
     except Exception as e:
-        print("An error occurred while checking CUDA: ", str(e))
-        print("Cuda is not detected. Ensure your CUDA is up-to-date with nvidia-smi")
+        print(Fore.RED + "An error occurred while checking CUDA: ", str(e))
+        print(Fore.RED + "CUDA is not detected. Ensure your CUDA is up-to-date with nvidia-smi")
         return "cpu"
 
-
-# Enable CUDA
+# Example usage
 device = cuda_enabled()
-print(f"Using device: {device}")
+print(Fore.GREEN + f"Using device: {device}")
 
 
 def load_configuration(yaml_path: str) -> Dict[str, Any]:
@@ -118,35 +139,37 @@ def load_configuration(yaml_path: str) -> Dict[str, Any]:
     /usr/local/d_weights/groundingdino_swint_ogc.pth
     """
     try:
-        # Load YAML content
-        with open(yaml_path, "r") as file:
-            config = yaml.safe_load(file)
+        with tqdm(total=3, desc= Fore.BLUE+"Loading DINOcut.yaml Configuration file") as pbar:
+            # Load YAML content
+            pbar.set_postfix(step="Opening YAML file")
+            with open(yaml_path, "r") as file:
+                config = yaml.safe_load(file)
+            pbar.update(1)
 
-        # Check if the YAML file was empty or improperly formatted
-        if config is None:
-            raise ValueError(
-                "The YAML file is empty or the contents are not in valid YAML format."
-            )
+            # Check if the YAML file was empty or improperly formatted
+            pbar.set_postfix(step="Parsing YAML file")
+            if config is None:
+                raise ValueError("The YAML file is empty or the contents are not in valid YAML format.")
+            pbar.update(1)
 
-        # Resolve environment variables in paths if they are included
-        if "paths" in config:
-            for key, value in config["paths"].items():
-                # Replace environment variables in paths with actual values
-                config["paths"][key] = os.path.expandvars(value)
+            # Resolve environment variables in paths if they are included
+            pbar.set_postfix(step="Resolving environment variables")
+            if "paths" in config:
+                for key, value in config["paths"].items():
+                    # Replace environment variables in paths with actual values
+                    config["paths"][key] = os.path.expandvars(value)
+            pbar.update(1)
 
     except Exception as e:
-        raise IOError(
-            f"An error occurred while reading or parsing the YAML file: {str(e)}"
-        )
+        raise IOError(Fore.RED+f"An error occurred while reading or parsing the YAML file: {str(e)}")
 
     return config
 
-
-# Example of using the function
+# Example usage
 yaml_path = "dinocut_config.yaml"
 config = load_configuration(yaml_path)
 
-
+#Environment variables
 GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(
     args.d_weights, config["paths"]["grounding_dino_checkpoint_path"]
 )
@@ -157,15 +180,7 @@ SAM_CHECKPOINT_PATH = os.path.join(
 )
 SAM_ENCODER_VERSION = config["model_configs"]["sam"]["encoder_version"]
 
-print(
-    GROUNDING_DINO_CHECKPOINT_PATH,
-    "; exist:",
-    os.path.isfile(GROUNDING_DINO_CHECKPOINT_PATH),
-)
-print(
-    GROUNDING_DINO_CONFIG_PATH, "; exist:", os.path.isfile(GROUNDING_DINO_CONFIG_PATH)
-)
-print(SAM_CHECKPOINT_PATH, "; exist:", os.path.isfile(SAM_CHECKPOINT_PATH))
+
 
 grounding_dino_model = Model(
     model_config_path=GROUNDING_DINO_CONFIG_PATH,
@@ -184,12 +199,27 @@ BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
 TEXT_TRESHOLD = config["image_settings"]["thresholds"]["text"]
 
 # Accessing variables from the config
+
+print(Fore.BLUE+"\n DINOcut is checking your directory structure.")
 print(
-    "Grounding DINO Checkpoint Path:", config["paths"]["grounding_dino_checkpoint_path"]
+    GROUNDING_DINO_CHECKPOINT_PATH,
+    "; exist:",
+    os.path.isfile(GROUNDING_DINO_CHECKPOINT_PATH),
 )
-print("SAM Checkpoint Path:", config["paths"]["sam_checkpoint_path"])
-print("Box Threshold:", config["image_settings"]["thresholds"]["box"])
-print(config)
+print(
+    GROUNDING_DINO_CONFIG_PATH, "; exist:", os.path.isfile(GROUNDING_DINO_CONFIG_PATH)
+)
+print(SAM_CHECKPOINT_PATH, "; exist:", os.path.isfile(SAM_CHECKPOINT_PATH))
+
+
+print(
+    Fore.GREEN+"\nGrounding DINO Checkpoint Path:", config["paths"]["grounding_dino_checkpoint_path"]
+)
+print(Fore.GREEN+"\nSAM Checkpoint Path:", config["paths"]["sam_checkpoint_path"])
+print(Fore.GREEN+"\nBox Threshold:", config["image_settings"]["thresholds"]["box"])
+print(Fore.GREEN+f"\nYour text prompt is: {CLASSES}")
+print(Fore.GREEN+f"DINOcut is pointed to the following source: {SOURCE_IMAGE_PATH}.", Fore.BLUE+ "\nChomp. \nChomp. \nChomp.")
+
 
 
 def enhance_class_name(class_names: List[str]) -> List[str]:
@@ -409,7 +439,7 @@ def show_sam_detections(
 
     # Optionally, display a grid of titles or other related visualizations
     # This part of implementation depends on how you want to display these titles
-    print("Titles for detected classes:", titles)
+    print(Fore.BLUE+"Titles for detected classes:", titles)
 
 
 def save_inverted_masks(detections: List[np.ndarray]) -> None:
@@ -507,7 +537,7 @@ def main():
             # Ensure the mask image loaded correctly
             if mask_img is None:
                 raise FileNotFoundError(
-                    f"The mask image {mask_filename} could not be loaded. Check the file path."
+                   f"The mask image {mask_filename} could not be loaded. Check the file path."
                 )
 
             # Apply mask and create new image
