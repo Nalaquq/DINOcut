@@ -12,7 +12,7 @@ model_configs:
 image_settings:
   source_image_path: "scraped_images" # can be either a directory or a single image
   classes:
-    - "semilunar knife" # change for each class in the object detector
+    - "semilunar knife" # change for each class in the object detector. Must be a qualitative label in lowercase. 
   thresholds:
     box: 0.30
     text: 0.20

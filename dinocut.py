@@ -176,8 +176,9 @@ sam = sam_model_registry[SAM_ENCODER_VERSION](checkpoint=SAM_CHECKPOINT_PATH).to
 )
 sam_predictor = SamPredictor(sam)
 
-SOURCE_IMAGE_PATH = "examples/images/uluaq_3.jpg"
-CLASSES = ["semilunar knife"]
+#Need to auomate this through and debug dinocut-config.yaml. Make sure to debug and pyut try/except loops. There is a problem when there is no detection. Also labels must be lowercase. Maybe convert the strings. 
+SOURCE_IMAGE_PATH = "examples/images/spongebob mailbox.png"
+CLASSES = ["spongebob squarepants"] #must be lowercase
 BOX_TRESHOLD = 0.30
 TEXT_TRESHOLD = 0.20
 
