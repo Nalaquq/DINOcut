@@ -10,9 +10,9 @@ model_configs:
     checkpoint_path: "sam_vit_h_4b8939.pth"
 
 image_settings:
-  source_image_path: "scraped_images" # can be either a directory or a single image
+  source_image_path: "examples/images/spongebob mailbox.png" # can be either a directory or a single image
   classes:
-    - "semilunar knife" # change for each class in the object detector. Must be a qualitative label in lowercase. 
+    - "mailbox" # change for each class in the object detector. Must be a qualitative label in lowercase. 
   thresholds:
     box: 0.30
     text: 0.20

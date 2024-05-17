@@ -176,11 +176,12 @@ sam = sam_model_registry[SAM_ENCODER_VERSION](checkpoint=SAM_CHECKPOINT_PATH).to
 )
 sam_predictor = SamPredictor(sam)
 
-#Need to auomate this through and debug dinocut-config.yaml. Make sure to debug and pyut try/except loops. There is a problem when there is no detection. Also labels must be lowercase. Maybe convert the strings. 
-SOURCE_IMAGE_PATH = "examples/images/spongebob mailbox.png"
-CLASSES = ["spongebob squarepants"] #must be lowercase
-BOX_TRESHOLD = 0.30
-TEXT_TRESHOLD = 0.20
+#Need to auomate this through and debug dinocut-config.yaml. Make sure to debug and pyut try/except loops. There is a problem when there is no detection. 
+SOURCE_IMAGE_PATH = config['image_settings']["source_image_path"]
+CLASSES = config["image_settings"]["classes"]
+CLASSES=[s.lower() for s in CLASSES]
+BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
+TEXT_TRESHOLD = config["image_settings"]["thresholds"]["text"]
 
 # Accessing variables from the config
 print(
@@ -484,7 +485,7 @@ def apply_mask(main_img: ndarray, mask_img: ndarray) -> ndarray:
 
 
 def main():
-    main_image_path = "examples/images/uluaq_3.jpg"
+    main_image_path = SOURCE_IMAGE_PATH
     mask_directory = "/home/nalkuq/cmm"
 
     # Load the main image
@@ -522,12 +523,16 @@ if __name__ == "__main__":
     # load image
     image = cv2.imread(SOURCE_IMAGE_PATH)
     detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
-    dino_display_image(image, detections, CLASSES)
-    detections.mask = segment(
+    try: 
+        dino_display_image(image, detections, CLASSES)
+        detections.mask = segment(
         sam_predictor=sam_predictor,
         image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
         xyxy=detections.xyxy,
     )
-    show_sam_detections(image, detections, CLASSES)
-    save_inverted_masks(detections.mask)
+        show_sam_detections(image, detections, CLASSES)
+        save_inverted_masks(detections.mask)
+    except: 
+        print(f"\nDinoCut was unable to find any instances of {CLASSES}. \nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.")
+
     main()
