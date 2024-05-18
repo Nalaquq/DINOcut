@@ -12,8 +12,29 @@ import cv2 as cv
 from numpy import ndarray
 import yaml
 from tqdm import tqdm
-import time 
+import time
 from colorama import init, Fore, Back, Style
+import warnings 
+import emoji
+
+# Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
+warnings.filterwarnings("ignore")
+
+def print_emoji_line(emoji_code: str, repeat_count: int) -> None:
+    """
+    Print an emoji multiple times on one line based on the provided emoji code.
+
+    Parameters:
+    emoji_code (str): The code for the emoji to be printed, e.g., ":T-Rex:".
+    repeat_count (int): The number of times the emoji should be printed.
+
+    Returns:
+    None
+    """
+    emoji_text = emoji.emojize(emoji_code)
+    print("\n", emoji_text * repeat_count, "\n")
+
+print_emoji_line(":T-Rex:", 1)
 
 init()
 parser = argparse.ArgumentParser(
@@ -49,13 +70,15 @@ args = parser.parse_args()
 
 if args.src:
     PATH_MAIN = args.src
-    print(Fore.RED +
-        f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.py -h to learn more.\n"
+    print(
+        Fore.RED
+        + f"\n No source directory given. Main Path set to:", Fore.BLUE+f"{PATH_MAIN}", Fore.RED+"Please use python3 dino_sam.py -h to learn more.\n"
     )
 else:
     PATH_MAIN = os.path.abspath("images")
-    print(Back.GREEN +
-        f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more.\n"
+    print(
+        Back.GREEN
+        + f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more.\n"
     )
 
 def cuda_enabled() -> str:
@@ -73,40 +96,44 @@ def cuda_enabled() -> str:
     try:
         with tqdm(total=3, desc=Fore.BLUE + "Checking CUDA availability") as pbar:
             if torch.cuda.is_available():
-                pbar.set_postfix(step=Fore.BLUE+"Checking if CUDA is available")
+                pbar.set_postfix(step=Fore.BLUE + "Checking if CUDA is available")
                 time.sleep(1)  # Simulate time delay
                 pbar.update(1)
 
-                pbar.set_postfix(step=Fore.BLUE+"Counting CUDA devices")
+                pbar.set_postfix(step=Fore.BLUE + "Counting CUDA devices")
                 device_count = torch.cuda.device_count()
                 time.sleep(1)  # Simulate time delay
                 pbar.update(1)
 
-                pbar.set_postfix(step=Fore.BLUE+"Getting current CUDA device index")
+                pbar.set_postfix(step=Fore.BLUE + "Getting current CUDA device index")
                 current_device = torch.cuda.current_device()
                 time.sleep(1)  # Simulate time delay
                 pbar.update(1)
 
-                print(Fore.GREEN + "CUDA is available.")
-                print(Fore.GREEN + f"Number of CUDA devices: {device_count}")
-                print(Fore.GREEN + f"Current CUDA device index: {current_device}")
+                print("\n")
+                print(Fore.GREEN + "\tCUDA is available.")
+                print(Fore.GREEN + f"\tNumber of CUDA devices: {device_count}")
+                print(Fore.GREEN + f"\tCurrent CUDA device index: {current_device}")
                 return "cuda"
             else:
                 pbar.set_postfix(step="CUDA not available, using CPU")
                 time.sleep(1)  # Simulate time delay
                 pbar.update(1)
 
-                print(Fore.RED + "CUDA is not available. Using CPU instead.")
+                print(Fore.RED + "\tCUDA is not available. Using CPU instead.")
                 return "cpu"
     except Exception as e:
-        print(Fore.RED + "An error occurred while checking CUDA: ", str(e))
-        print(Fore.RED + "CUDA is not detected. Ensure your CUDA is up-to-date with nvidia-smi")
+        print(Fore.RED + "\tAn error occurred while checking CUDA: ", str(e))
+        print(
+            Fore.RED
+            + "\tCUDA is not detected. Ensure your CUDA is up-to-date with nvidia-smi"
+        )
         return "cpu"
 
-# Example usage
-device = cuda_enabled()
-print(Fore.GREEN + f"Using device: {device}")
 
+# Init CUDA
+print_emoji_line(":T-Rex:", 2)
+device = cuda_enabled()
 
 def load_configuration(yaml_path: str) -> Dict[str, Any]:
     """
@@ -139,7 +166,9 @@ def load_configuration(yaml_path: str) -> Dict[str, Any]:
     /usr/local/d_weights/groundingdino_swint_ogc.pth
     """
     try:
-        with tqdm(total=3, desc= Fore.BLUE+"Loading DINOcut.yaml Configuration file") as pbar:
+        with tqdm(
+            total=3, desc=Fore.BLUE + "Loading DINOcut.yaml Configuration file"
+        ) as pbar:
             # Load YAML content
             pbar.set_postfix(step="Opening YAML file")
             with open(yaml_path, "r") as file:
@@ -149,7 +178,9 @@ def load_configuration(yaml_path: str) -> Dict[str, Any]:
             # Check if the YAML file was empty or improperly formatted
             pbar.set_postfix(step="Parsing YAML file")
             if config is None:
-                raise ValueError("The YAML file is empty or the contents are not in valid YAML format.")
+                raise ValueError(
+                    "The YAML file is empty or the contents are not in valid YAML format."
+                )
             pbar.update(1)
 
             # Resolve environment variables in paths if they are included
@@ -161,15 +192,20 @@ def load_configuration(yaml_path: str) -> Dict[str, Any]:
             pbar.update(1)
 
     except Exception as e:
-        raise IOError(Fore.RED+f"An error occurred while reading or parsing the YAML file: {str(e)}")
+        raise IOError(
+            Fore.RED
+            + f"An error occurred while reading or parsing the YAML file: {str(e)}"
+        )
 
     return config
 
+print_emoji_line(":T-Rex:", 3)
 # Example usage
 yaml_path = "dinocut_config.yaml"
 config = load_configuration(yaml_path)
 
-#Environment variables
+
+# Environment variables
 GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(
     args.d_weights, config["paths"]["grounding_dino_checkpoint_path"]
 )
@@ -181,7 +217,6 @@ SAM_CHECKPOINT_PATH = os.path.join(
 SAM_ENCODER_VERSION = config["model_configs"]["sam"]["encoder_version"]
 
 
-
 grounding_dino_model = Model(
     model_config_path=GROUNDING_DINO_CONFIG_PATH,
     model_checkpoint_path=GROUNDING_DINO_CHECKPOINT_PATH,
@@ -191,35 +226,31 @@ sam = sam_model_registry[SAM_ENCODER_VERSION](checkpoint=SAM_CHECKPOINT_PATH).to
 )
 sam_predictor = SamPredictor(sam)
 
-#Need to auomate this through and debug dinocut-config.yaml. Make sure to debug and pyut try/except loops. There is a problem when there is no detection. 
-SOURCE_IMAGE_PATH = config['image_settings']["source_image_path"]
+# Need to auomate this through and debug dinocut-config.yaml. Make sure to debug and pyut try/except loops. There is a problem when there is no detection.
+SOURCE_IMAGE_PATH = config["image_settings"]["source_image_path"]
 CLASSES = config["image_settings"]["classes"]
-CLASSES=[s.lower() for s in CLASSES]
+CLASSES = [s.lower() for s in CLASSES]
 BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
 TEXT_TRESHOLD = config["image_settings"]["thresholds"]["text"]
 
-# Accessing variables from the config
 
-print(Fore.BLUE+"\n DINOcut is checking your directory structure.")
+print_emoji_line(":T-Rex:", 4)
+print(Fore.BLUE+ "\nChecking Config Settings:")
 print(
-    GROUNDING_DINO_CHECKPOINT_PATH,
-    "; exist:",
-    os.path.isfile(GROUNDING_DINO_CHECKPOINT_PATH),
+    Fore.GREEN + "\n\tGrounding DINO Checkpoint Path:",
+    Fore.RED+ config["paths"]["grounding_dino_checkpoint_path"],
 )
-print(
-    GROUNDING_DINO_CONFIG_PATH, "; exist:", os.path.isfile(GROUNDING_DINO_CONFIG_PATH)
-)
-print(SAM_CHECKPOINT_PATH, "; exist:", os.path.isfile(SAM_CHECKPOINT_PATH))
+print(Fore.GREEN + "\tSAM Checkpoint Path:", Fore.RED+config["paths"]["sam_checkpoint_path"])
+print(Fore.GREEN + "\tBox Threshold:", Fore.RED+str(config["image_settings"]["thresholds"]["box"]))
+print(Fore.GREEN + "\tBox Threshold:", Fore.RED+str(config["image_settings"]["thresholds"]["text"]))
+print(Fore.GREEN + f"\tYour text prompt is:", Fore.RED+f"{CLASSES}")
 
 
 print(
-    Fore.GREEN+"\nGrounding DINO Checkpoint Path:", config["paths"]["grounding_dino_checkpoint_path"]
+    Fore.GREEN + "\tImage Source Path:", Fore.RED+f"{SOURCE_IMAGE_PATH}"
 )
-print(Fore.GREEN+"\nSAM Checkpoint Path:", config["paths"]["sam_checkpoint_path"])
-print(Fore.GREEN+"\nBox Threshold:", config["image_settings"]["thresholds"]["box"])
-print(Fore.GREEN+f"\nYour text prompt is: {CLASSES}")
-print(Fore.GREEN+f"DINOcut is pointed to the following source: {SOURCE_IMAGE_PATH}.", Fore.BLUE+ "\nChomp. \nChomp. \nChomp.")
 
+print_emoji_line(":T-Rex:", 5)
 
 
 def enhance_class_name(class_names: List[str]) -> List[str]:
@@ -437,10 +468,6 @@ def show_sam_detections(
         CLASSES[d[3]] for d in detections
     ]  # Adjust this if the structure of detections differs
 
-    # Optionally, display a grid of titles or other related visualizations
-    # This part of implementation depends on how you want to display these titles
-    print(Fore.BLUE+"Titles for detected classes:", titles)
-
 
 def save_inverted_masks(detections: List[np.ndarray]) -> None:
     """
@@ -513,7 +540,6 @@ def apply_mask(main_img: ndarray, mask_img: ndarray) -> ndarray:
 
     return masked_feature
 
-
 def main():
     main_image_path = SOURCE_IMAGE_PATH
     mask_directory = "/home/nalkuq/cmm"
@@ -551,18 +577,23 @@ def main():
 
 if __name__ == "__main__":
     # load image
+    print(Fore.BLUE+ "\nDINOCUT is detecting instances of:", Fore.GREEN+f"{CLASSES}")
     image = cv2.imread(SOURCE_IMAGE_PATH)
     detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
-    try: 
+    print_emoji_line(":T-Rex:", 6)
+    print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
+    print_emoji_line(":T-Rex:", 7)
+    try:
         dino_display_image(image, detections, CLASSES)
         detections.mask = segment(
-        sam_predictor=sam_predictor,
-        image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
-        xyxy=detections.xyxy,
-    )
+            sam_predictor=sam_predictor,
+            image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
+            xyxy=detections.xyxy,
+        )
         show_sam_detections(image, detections, CLASSES)
         save_inverted_masks(detections.mask)
-    except: 
-        print(f"\nDinoCut was unable to find any instances of {CLASSES}. \nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.")
-
-    main()
+        main()
+    except:
+        print(Fore.RED+
+            f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
+        )
