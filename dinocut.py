@@ -1,5 +1,6 @@
 import os
 import torch
+import random
 import supervision as sv
 import argparse
 from groundingdino.util.inference import Model
@@ -19,6 +20,15 @@ import emoji
 
 # Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
 warnings.filterwarnings("ignore")
+
+def check_path(path):
+    if os.path.isfile(path):
+        return path
+    elif os.path.isdir(path):
+        return [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    else:
+        raise ValueError("The provided path is neither a file nor a directory. Ensure that your source image path in DINOcut.yaml is correct")
+
 
 def print_emoji_line(emoji_code: str, repeat_count: int) -> None:
     """
@@ -228,6 +238,8 @@ sam_predictor = SamPredictor(sam)
 
 # Need to auomate this through and debug dinocut-config.yaml. Make sure to debug and pyut try/except loops. There is a problem when there is no detection.
 SOURCE_IMAGE_PATH = config["image_settings"]["source_image_path"]
+
+
 CLASSES = config["image_settings"]["classes"]
 CLASSES = [s.lower() for s in CLASSES]
 BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
@@ -483,12 +495,13 @@ def save_inverted_masks(detections: List[np.ndarray]) -> None:
     Returns:
         None: This function does not return a value but saves files to the disk.
     """
-    for i, mask in enumerate(detections):
+    for id, mask in enumerate(detections):
         # Convert the boolean mask to uint8 by multiplying by 255
+        id=time.time()
         mask_to_save = (mask * 255).astype(np.uint8)
         # Invert the mask colors: foreground (object) becomes black, background becomes white
         inverted_mask = 255 - mask_to_save
-        mask_filename = f"mask_{i}.png"
+        mask_filename = f"mask_{id}.png"
         # Save the inverted mask using cv2.imwrite
         cv2.imwrite(mask_filename, inverted_mask)
         print(f"Saved inverted mask to {mask_filename}")
@@ -578,22 +591,43 @@ def main():
 if __name__ == "__main__":
     # load image
     print(Fore.BLUE+ "\nDINOCUT is detecting instances of:", Fore.GREEN+f"{CLASSES}")
-    image = cv2.imread(SOURCE_IMAGE_PATH)
-    detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
-    print_emoji_line(":T-Rex:", 6)
-    print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
-    print_emoji_line(":T-Rex:", 7)
-    try:
-        dino_display_image(image, detections, CLASSES)
-        detections.mask = segment(
-            sam_predictor=sam_predictor,
-            image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
-            xyxy=detections.xyxy,
-        )
-        show_sam_detections(image, detections, CLASSES)
-        save_inverted_masks(detections.mask)
-        main()
-    except:
-        print(Fore.RED+
-            f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
-        )
+    path=check_path(SOURCE_IMAGE_PATH)
+    if isinstance(path, str): 
+        image = cv2.imread(SOURCE_IMAGE_PATH)
+        detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
+        print_emoji_line(":T-Rex:", 6)
+        print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
+        print_emoji_line(":T-Rex:", 7)
+        try:
+            dino_display_image(image, detections, CLASSES)
+            detections.mask = segment(
+                sam_predictor=sam_predictor,
+                image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
+                xyxy=detections.xyxy,
+            )
+            show_sam_detections(image, detections, CLASSES)
+            save_inverted_masks(detections.mask)
+            main()
+        except:
+            print(Fore.RED+
+                f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
+            )
+    if isinstance(path, list): 
+        for file in path:
+            image=file
+            image = cv2.imread(file)
+            detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
+            print_emoji_line(":T-Rex:", 6)
+            print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
+            print_emoji_line(":T-Rex:", 7)
+            try:
+                dino_display_image(image, detections, CLASSES)
+                detections.mask = segment(sam_predictor=sam_predictor,image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),xyxy=detections.xyxy,)
+                show_sam_detections(image, detections, CLASSES)
+                save_inverted_masks(detections.mask)
+                main()
+            except:
+                print(Fore.RED+
+                        f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
+                    )
+            
