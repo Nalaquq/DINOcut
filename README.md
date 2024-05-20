@@ -32,14 +32,18 @@ python3 dinocut.py
 ```
 4. Review segmentation masks and delete false positives: 
 
-5. 
+5. Sit back and relax as DINOcut generates your dataset. 
 
+6. You can also use our [Cut, Paste, Learn](https://arxiv.org/abs/1708.01642) implementation as a standalone CLI: 
+```bash
+python3 sythetic.py -h
+```
 
 # 🧠 Conceptual Design 📚 
-The goal of this project is simple: to combine sommething old with soemthing new. So we've created an image processing pipeline for object detection using Grounding DINO; SAM; and a cut, paste learn (BGcut) approach. The result is a semi-supervised image processing pipeline that allows users to generate large, synthetic datasets for object detection without the hassle of manually labeling bounding boxes or creating segmentation masks. 
+The goal of this project is simple: to combine sommething old with soemthing new. So we've created an image processing pipeline for object detection using Grounding DINO; SAM; and a Cut, Paste Learn approach. The result is a semi-supervised image processing pipeline that allows users to generate large, synthetic datasets for object detection without the hassle of manually labeling bounding boxes or creating segmentation masks. 
 
 <div align="center">
-    <img src="assets/DINOcut fig 1.png" width="100%">
+    <img src="assets/DINOcut fig 1.png" width="50%">
 </div>
  
 # 🔧 Install 
@@ -58,6 +62,11 @@ git clone https://github.com/Nalaquq/cmm.git
 pip install -e .
 ```
 
+3.  Run setup.py
+
+```bash
+python3 setup.py
+```
 # 😳 Troubleshooting 
 **Virtual Environments:**
 
@@ -132,19 +141,25 @@ https://github.com/IDEA-Research/GroundingDINO/issues/193
  [ImageBot](https://www.sciencedirect.com/science/article/pii/S2212827122002876?ref=pdf_download&fr=RR-2&rr=87b01ff6f8558bb9): A cut paste learn approach approach developed by Block et. al (2022). [Github Repo](https://github.com/FraunhoferIAO/Image-Bot)
 
 
-# 📂 Directory structure 📂
+# 📂 Project Structure 📂
 
     .
-    ├── BlenderProc             # directory contains scripts, assets, and packages for synthetic data generation from 3D models
-    ├── data                    # directory contains images, masks, and other assets for synthetic data generation
-    ├── dataset                 # directory contains the final dataset containing images and YOLO-style labels for training the Neural Network
-    ├── runs                    # directory contains the results of YOLO detections 
-    ├── chroma.py               # a python script for generating synthetic datasets using a green screen.
-    ├── requirements.txt	# latest PIP dependencies 	
-    └── synthetic.py		# Script for generating the synthetic dataset using a CLI 	
-    └── README.md
+    ├── assets              # figures, images, etc. 
+    ├── data                # data used to generate synthetic data with DINOcut or synthetic.py
+    ├── dataset             # The final dataset containing images and annotations
+    ├── GroundingDINO       # GroundingDINO model installed by setup.py
+    ├── sam                 # The Segment Anything Model and weights downloade by setup.py
+    ├── scripts             # Utility functions and synthetic.py
+    ├── starter_dataset     # Directoryu to place scraped images into this folder for DINOcut to parse.
+    ├── citation.cff        # Relevent citations for the project
+    ├── dinocut_config.yaml # yaml file for DINOcut settings
+    ├── dinocut.py          # the main app for DINOcut
+    ├── LICENSE             # Apache liscence 
+    ├── README.md           # readme docs
+    ├── requirements.txt    # latest PIP dependencies 
+    └── setup.py	        # setup script
+    └── venv.sh             # inits the virtual environment and creates a full markdown tree of project materials
 
-# Installation 
 
 # Languages & Dependencies 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)

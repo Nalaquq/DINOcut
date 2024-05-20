@@ -11,7 +11,7 @@ from scipy import ndimage
 from skimage.io import imread
 
 
-path = "examples/images"
+path = "assets/examples/images"
 
 img_list = os.listdir(path)
 
