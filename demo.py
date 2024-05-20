@@ -3,85 +3,107 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 
-class ImageViewerApp:
-    def __init__(self, root: tk.Tk) -> None:
-        """
-        Initialize the Image Viewer application.
-
-        Args:
-            root (tk.Tk): The root window of the Tkinter application.
-        """
+class ImageMaskViewer:
+    def __init__(self, root):
         self.root = root
-        self.root.title("Image Viewer")
-        self.root.geometry("800x600")
+        self.root.title("Image and Mask Viewer")
+        self.directory = ""
+        self.image_files = []
+        self.current_index = 0
 
-        self.label = tk.Label(root, text="Select a directory to view images", font=("Arial", 14))
-        self.label.pack(pady=10)
+        self.load_button = tk.Button(self.root, text="Load Directory", command=self.load_directory)
+        self.load_button.pack()
 
-        self.canvas = tk.Canvas(root, width=700, height=500)
-        self.canvas.pack()
+        self.image_label = tk.Label(self.root)
+        self.image_label.pack(side="left", padx=10)
 
-        self.dir_button = tk.Button(root, text="Select Directory", command=self.select_directory)
-        self.dir_button.pack(side=tk.LEFT, padx=20, pady=20)
+        self.mask_label = tk.Label(self.root)
+        self.mask_label.pack(side="right", padx=10)
 
-        self.next_button = tk.Button(root, text="Next Image", command=self.next_image, state=tk.DISABLED)
-        self.next_button.pack(side=tk.RIGHT, padx=10, pady=20)
+        self.delete_button = tk.Button(self.root, text="Delete Pair", command=self.delete_pair)
+        self.delete_button.pack()
 
-        self.prev_button = tk.Button(root, text="Previous Image", command=self.prev_image, state=tk.DISABLED)
-        self.prev_button.pack(side=tk.RIGHT, padx=10, pady=20)
+        self.prev_button = tk.Button(self.root, text="Previous", command=self.prev_image)
+        self.prev_button.pack(side="left", padx=10)
 
-        self.images: list[str] = []
-        self.current_image_index: int = -1
+        self.next_button = tk.Button(self.root, text="Next", command=self.next_image)
+        self.next_button.pack(side="right", padx=10)
 
-    def select_directory(self) -> None:
-        """
-        Open a file dialog to select a directory and load all image files.
-        """
-        directory = filedialog.askdirectory(title="Select a directory")
-        if directory:
-            self.images = [os.path.join(directory, file) for file in os.listdir(directory) 
-                           if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
-            self.current_image_index = 0
-            if self.images:
-                self.display_image()
-                self.next_button.config(state=tk.NORMAL if len(self.images) > 1 else tk.DISABLED)
-                self.prev_button.config(state=tk.NORMAL if len(self.images) > 1 else tk.DISABLED)
-            else:
-                messagebox.showinfo("No Images", "No images found in the selected directory.")
-                self.canvas.delete("all")
-                self.label.config(text="Select a directory to view images")
-                self.next_button.config(state=tk.DISABLED)
-                self.prev_button.config(state=tk.DISABLED)
+        self.bottom_frame = tk.Frame(self.root)
+        self.bottom_frame.pack(side="bottom", fill="x")
 
-    def display_image(self) -> None:
-        """
-        Display the current image on the canvas.
-        """
-        if 0 <= self.current_image_index < len(self.images):
-            image_path = self.images[self.current_image_index]
-            image = Image.open(image_path)
-            image = image.resize((700, 500), Image.Resampling.LANCZOS)
-            self.image_tk = ImageTk.PhotoImage(image)
-            self.canvas.create_image(350, 250, image=self.image_tk)
-            self.label.config(text=os.path.basename(image_path))
+        self.save_exit_button = tk.Button(self.bottom_frame, text="Save and Exit", command=self.save_and_exit)
+        self.save_exit_button.pack(pady=20)
 
-    def next_image(self) -> None:
-        """
-        Display the next image in the directory.
-        """
-        if self.current_image_index < len(self.images) - 1:
-            self.current_image_index += 1
-            self.display_image()
+    def load_directory(self):
+        self.directory = filedialog.askdirectory()
+        if not self.directory:
+            return
+        self.image_files = [f for f in os.listdir(self.directory) if f.endswith('.jpg')]
+        self.current_index = 0
+        self.show_image()
 
-    def prev_image(self) -> None:
-        """
-        Display the previous image in the directory.
-        """
-        if self.current_image_index > 0:
-            self.current_image_index -= 1
-            self.display_image()
+    def show_image(self):
+        if not self.image_files:
+            return
+
+        image_file = self.image_files[self.current_index]
+        mask_file = image_file.replace('.jpg', '.png')
+
+        image_path = os.path.join(self.directory, image_file)
+        mask_path = os.path.join(self.directory, mask_file)
+
+        if not os.path.exists(mask_path):
+            messagebox.showerror("Error", f"Mask file {mask_file} not found")
+            return
+
+        image = Image.open(image_path)
+        mask = Image.open(mask_path)
+
+        image = image.resize((300, 300), Image.Resampling.LANCZOS)
+        mask = mask.resize((300, 300), Image.Resampling.LANCZOS)
+
+        self.image_tk = ImageTk.PhotoImage(image)
+        self.mask_tk = ImageTk.PhotoImage(mask)
+
+        self.image_label.config(image=self.image_tk)
+        self.mask_label.config(image=self.mask_tk)
+
+    def delete_pair(self):
+        if not self.image_files:
+            return
+
+        image_file = self.image_files[self.current_index]
+        mask_file = image_file.replace('.jpg', '.png')
+
+        image_path = os.path.join(self.directory, image_file)
+        mask_path = os.path.join(self.directory, mask_file)
+
+        os.remove(image_path)
+        os.remove(mask_path)
+
+        del self.image_files[self.current_index]
+
+        if self.current_index >= len(self.image_files):
+            self.current_index = max(0, len(self.image_files) - 1)
+
+        self.show_image()
+
+    def prev_image(self):
+        if self.current_index > 0:
+            self.current_index -= 1
+            self.show_image()
+
+    def next_image(self):
+        if self.current_index < len(self.image_files) - 1:
+            self.current_index += 1
+            self.show_image()
+
+    def save_and_exit(self):
+        self.root.quit()
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = ImageViewerApp(root)
+    app = ImageMaskViewer(root)
     root.mainloop()
+

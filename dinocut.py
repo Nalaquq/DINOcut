@@ -561,7 +561,7 @@ def apply_mask(main_img: ndarray, mask_img: ndarray) -> ndarray:
 #this is a problem when you attempt to upload a directory. 
 #The problem originates with the SOURCE_IMAGE Path Variable 
 #Need to change this function. Work on this asap. 
-def main(path):
+def create_training_image(path):
     main_image_path = path
     mask_directory = config["paths"]["home_directory"]
     
@@ -579,7 +579,6 @@ def main(path):
             mask_img = cv2.imread(
                 os.path.join(mask_directory, mask_filename), cv2.IMREAD_GRAYSCALE
             )
-
             # Ensure the mask image loaded correctly
             if mask_img is None:
                 raise FileNotFoundError(
@@ -593,20 +592,6 @@ def main(path):
             feature_img_path = f"{mask_filename[:-4]}.jpg"
             cv2.imwrite(feature_img_path, feature_img)
             print(f"Saved {feature_img_path}")
-
-
-def main_test(image, mask):
-    main_image_path = image
-    mask_path = mask
-    # Load the main image
-    main_img = cv2.imread(main_image_path)
-    mask_img = cv2.imread(mask_path)
-    # Apply mask and create new image
-    feature_img = apply_mask(main_img, mask_img)
-    # Save the new image
-    feature_img_path = f"{mask_path[:-4]}.jpg"
-    cv2.imwrite(feature_img_path, feature_img)
-    print(f"Saved {feature_img_path}")
 
 if __name__ == "__main__":
     # load image
@@ -627,7 +612,7 @@ if __name__ == "__main__":
             )
             show_sam_detections(image, detections, CLASSES)
             save_inverted_masks(detections.mask)
-            main(path)
+            create_training_image(path)
             #need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder. 
             directory=f"{path[:-4]}"
             try:
@@ -644,7 +629,6 @@ if __name__ == "__main__":
                 if files.endswith(".jpg"):
                     shutil.move(files, directory)
                 else: 
-                    print(files)
                     pass
         except:
             print(Fore.RED+
@@ -663,8 +647,7 @@ if __name__ == "__main__":
                 detections.mask = segment(sam_predictor=sam_predictor,image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),xyxy=detections.xyxy,)
                 show_sam_detections(image, detections, CLASSES)
                 mask=save_inverted_masks(detections.mask)
-                main(path)
-                #need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder. 
+                create_training_image(path)
                 directory=f"{path[:-4]}"
                 try:
                     os.mkdir(directory)
@@ -680,7 +663,6 @@ if __name__ == "__main__":
                     if files.endswith(".jpg"):
                         shutil.move(files, directory)
                     else: 
-                        print(files)
                         pass
             except:
                 print(Fore.RED+
