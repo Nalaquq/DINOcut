@@ -13,7 +13,27 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 
 #  Usage
-insert video of it working...recorded shell script..
+1. Modify dinocut_config.yaml to specify the paths for your input images, model parameters, and input prompts. 
+2. Upload background and distractor objects to the background and bg_noise directories: 
+```bash
+├── data
+│   ├── background
+│   ├── bg_noise
+│       ├── images
+│       ├── masks
+```
+Our original implementation uses [Li et al's 2021 BG-20K dataset](https://paperswithcode.com/dataset/bg-20k) accessible [here](https://drive.google.com/drive/folders/1ZBaMJxZtUNHIuGj8D8v3B9Adn8dbHwSS). 
+
+Distractor objects saved in the bg_noise directory should contain seperate folders for images and masks. You can download mask and image files for distactors from [shapenet])(https://shapenet.org/) or make your own. 
+
+3. Run DINOCUT from the command line: 
+```bash
+python3 dinocut.py 
+```
+4. Review segmentation masks and delete false positives: 
+
+5. 
+
 
 # 🧠 Conceptual Design 📚 
 The goal of this project is simple: to combine sommething old with soemthing new. So we've created an image processing pipeline for object detection using Grounding DINO; SAM; and a cut, paste learn (BGcut) approach. The result is a semi-supervised image processing pipeline that allows users to generate large, synthetic datasets for object detection without the hassle of manually labeling bounding boxes or creating segmentation masks. 
