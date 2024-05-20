@@ -666,7 +666,8 @@ def dinocut_generate():
                         f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
                     )
 
+
 if __name__ == "__main__":
     dinocut_generate()
-    #os.system("python3 scripts/selector.py")
-    #os.system("python3 synthetic.py")
+    os.system("python3 scripts/selector.py")
+    #os.system("python3 scripts/synthetic.py")
