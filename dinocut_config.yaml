@@ -18,8 +18,9 @@ image_settings:
   thresholds:
     box: 0.30
     text: 0.20
+  format: yolo #select between yolo, coco, and voc label formats
 
-#Feature Augmentation for synthetic Generation step of DINOcut.py
+#Augmentatoin settings for Augmentations Python Library
 transforms_bg_obj:
   - RandomRotate90:
       p: 1

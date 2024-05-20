@@ -18,7 +18,9 @@ insert video of it working...recorded shell script..
 # 🧠 Conceptual Design 📚 
 The goal of this project is simple: to combine sommething old with soemthing new. So we've created an image processing pipeline for object detection using Grounding DINO; SAM; and a cut, paste learn (BGcut) approach. The result is a semi-supervised image processing pipeline that allows users to generate large, synthetic datasets for object detection without the hassle of manually labeling bounding boxes or creating segmentation masks. 
 
-insert diagram of the workflow. . . 
+<div align="center">
+    <img src="assets/DINOcut fig 1.png" width="100%">
+</div>
  
 # 🔧 Install 
 
