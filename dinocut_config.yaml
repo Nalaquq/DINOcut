@@ -11,10 +11,37 @@ model_configs:
     checkpoint_path: "sam_vit_h_4b8939.pth"
 
 image_settings:
-  source_image_path: "scraped_images" # can be either a directory or a single image
+  source_image_path: "starter_dataset" # can be either a directory or a single image
   classes:
     - "spongebob" # change for each class in the object detector. Must be a qualitative label in lowercase. 
   thresholds:
     box: 0.30
     text: 0.20
+
+#Feature Augmentation for Synthetic Generation step of DINOcut.py
+transforms_bg_obj:
+  - RandomRotate90:
+      p: 1
+  - ColorJitter:
+      brightness: 0.3
+      contrast: 0.3
+      saturation: 0.3
+      hue: 0.07
+      always_apply: false
+      p: 1
+  - Blur:
+      blur_limit: [3, 15]
+      always_apply: false
+      p: 0.5
+
+transforms_obj:
+  - RandomRotate90:
+      p: 1
+  - RandomBrightnessContrast:
+      brightness_limit: [-0.5, 0.2]
+      contrast_limit: 0.1
+      brightness_by_max: true
+      always_apply: false
+      p: 1
+
 

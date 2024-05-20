@@ -25,6 +25,7 @@ print(f.renderText('DINOcut'))
 
 # Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
 warnings.filterwarnings("ignore")
+init()
 
 def check_path(path):
     if os.path.isfile(path):
@@ -51,7 +52,7 @@ def print_emoji_line(emoji_code: str, repeat_count: int) -> None:
 
 print_emoji_line(":T-Rex:", 1)
 
-init()
+
 parser = argparse.ArgumentParser(
     description="GroundingDINO and SAM for mask extraction."
 )
@@ -61,7 +62,7 @@ parser.add_argument(
     "-src_dir",
     type=os.path.abspath,
     help="the source directory containing your images that you will use to generate masks",
-    default=os.path.abspath("scraped_images"),
+    default=os.path.abspath("starter_dataset"),
 )
 
 parser.add_argument(
@@ -90,7 +91,7 @@ if args.src:
         + f"\n No source directory given. Main Path set to:", Fore.BLUE+f"{PATH_MAIN}", Fore.RED+"Please use python3 dino_sam.py -h to learn more.\n"
     )
 else:
-    PATH_MAIN = os.path.abspath("scraped_images")
+    PATH_MAIN = os.path.abspath("starter_dataset")
     print(
         Back.GREEN
         + f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more\n"
@@ -251,6 +252,7 @@ BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
 TEXT_TRESHOLD = config["image_settings"]["thresholds"]["text"]
 
 
+
 print_emoji_line(":T-Rex:", 4)
 print(Fore.BLUE+ "\nChecking Config Settings:")
 print(
@@ -266,7 +268,6 @@ print(Fore.GREEN + f"\tYour text prompt is:", Fore.RED+f"{CLASSES}")
 print(
     Fore.GREEN + "\tImage Source Path:", Fore.RED+f"{SOURCE_IMAGE_PATH}"
 )
-
 print_emoji_line(":T-Rex:", 5)
 
 
@@ -407,7 +408,6 @@ def dino_display_image(
     )
     sv.plot_image(annotated_frame, (16, 16))
 
-
 def segment(
     sam_predictor: SamPredictor, image: np.ndarray, xyxy: np.ndarray
 ) -> np.ndarray:
@@ -418,7 +418,6 @@ def segment(
         index = np.argmax(scores)
         result_masks.append(masks[index])
     return np.array(result_masks)
-
 
 def show_sam_detections(
     image: np.ndarray,
@@ -485,7 +484,6 @@ def show_sam_detections(
         CLASSES[d[3]] for d in detections
     ]  # Adjust this if the structure of detections differs
 
-
 def save_inverted_masks(detections: List[np.ndarray]) -> None:
     """
     Saves inverted color masks from a list of numpy arrays to separate PNG files.
@@ -510,7 +508,6 @@ def save_inverted_masks(detections: List[np.ndarray]) -> None:
         # Save the inverted mask using cv2.imwrite
         cv2.imwrite(mask_filename, inverted_mask)
         print(f"Saved inverted mask to {mask_filename}")
-
 
 def apply_mask(main_img: ndarray, mask_img: ndarray) -> ndarray:
     """
@@ -593,7 +590,7 @@ def create_training_image(path):
             cv2.imwrite(feature_img_path, feature_img)
             print(f"Saved {feature_img_path}")
 
-if __name__ == "__main__":
+def dinocut_generate():
     # load image
     print(Fore.BLUE+ "\nDINOCUT is detecting instances of:", Fore.GREEN+f"{CLASSES}")
     path=check_path(SOURCE_IMAGE_PATH)
@@ -669,3 +666,7 @@ if __name__ == "__main__":
                         f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
                     )
 
+if __name__ == "__main__":
+    dinocut_generate()
+    #os.system("python3 scripts/selector.py")
+    #os.system("python3 synthetic.py")

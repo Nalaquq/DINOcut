@@ -13,6 +13,9 @@ from PIL import Image
 from typing import Dict, List, Optional, Any
 import json
 from collections import OrderedDict
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 parser = argparse.ArgumentParser(
@@ -71,7 +74,7 @@ parser.add_argument(
     "-config_file",
     type=os.path.abspath,
     help="The location of the config.yaml file containing your albumentations configurations. If not selected synthetic.py will try to load config.py",
-    default="synthetic_config.yaml",
+    default="dinocut_config.yaml",
 )
 parser.add_argument(
     "-format",
@@ -92,7 +95,7 @@ else:
 if args.config:
     yaml_path = args.config
 else:
-    yaml_path = "synthetic_config.yaml"
+    yaml_path = "dinocut_config.yaml"
 
 
 def obj_list():
@@ -294,6 +297,9 @@ def load_transformations_from_yaml(yaml_path: str) -> list:
     # Load YAML file
     with open(yaml_path, "r") as file:
         config = yaml.safe_load(file)
+        #strips away other items from dinocut.yaml to just focus on the image augmentation settings. 
+        config = list(config.items())[-2:]
+        config = dict(config)
 
     # Helper function to construct an Albumentations Compose object from a list of transformations
     def construct_transformation(transform_config):
@@ -315,6 +321,9 @@ def load_transformations_from_yaml(yaml_path: str) -> list:
 transformation_objects = load_transformations_from_yaml(yaml_path)
 transforms_bg_obj = transformation_objects["transforms_bg_obj"]
 transforms_obj = transformation_objects["transforms_obj"]
+
+print(transforms_bg_obj)
+print(transforms_obj)
 
 
 def resize_transform_obj(
@@ -1293,7 +1302,7 @@ elif args.format == "voc":
     except: 
         pass
     labelmap_path = os.path.join(root_directory, "labelmap.txt")
-     with open(labelmap_path, "w") as f:
+    with open(labelmap_path, "w") as f:
         for i, name in enumerate(class_names):
             f.write(f"id: {i + 1}\n")
             f.write(f"name: \"{name}\"\n")

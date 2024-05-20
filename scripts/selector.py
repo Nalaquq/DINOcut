@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 class ImageMaskViewer:
     def __init__(self, root):
         self.root = root
-        self.root.title("Image and Mask Viewer")
+        self.root.title("DINOcut Reviewer")
         self.directory = ""
         self.image_files = []
         self.current_index = 0
