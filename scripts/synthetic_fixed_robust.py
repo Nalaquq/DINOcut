@@ -136,13 +136,15 @@ def obj_list():
         specific global configurations, which might lead to errors if not properly setup.
     """
     obj_dict = {}
-    folder_count = len(next(os.walk(PATH_MAIN))[1])
+    folders = next(os.walk(PATH_MAIN))[1]
+    folder_count = len(folders)
     for f in range(folder_count):
-        obj_dict[f] = {
-            "folder": next(os.walk(PATH_MAIN))[1][f],
-            "longest_min": args.min,
-            "longest_max": args.max,
-        }
+        if f < len(folders):
+            obj_dict[f] = {
+                "folder": folders[f],
+                "longest_min": args.min,
+                "longest_max": args.max,
+            }
 
     # delete the "background images" since it does not have the same directory structure
     def delete_folders(data):
@@ -726,7 +728,7 @@ def create_composition(
 
     return img_comp, mask_comp, labels_comp, obj_areas
 
-
+'''
 def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> list:
     """
         Generate YOLO format annotations for objects identified in a mask with associated labels.
@@ -784,7 +786,67 @@ def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> l
         )
 
     return annotations_yolo
+'''
+def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> list:
+    """
+    Generate YOLO format annotations for objects identified in a mask with associated labels.
 
+    Parameters:
+        mask_comp (np.ndarray): A 2D array where each pixel's integer value represents the object ID.
+        labels_comp (np.ndarray): An array containing the labels corresponding to each object ID in mask_comp.
+
+    Returns:
+        list: A list of lists, where each inner list contains normalized bounding box information
+              and the label for an object in YOLO format ([class_id, x_center, y_center, width, height]).
+    """
+    comp_w, comp_h = mask_comp.shape[1], mask_comp.shape[0]
+
+    obj_ids = np.unique(mask_comp).astype(np.uint8)[1:]
+    masks = mask_comp == obj_ids[:, None, None]
+
+    # Debug prints to check sizes and contents
+    print(f"Length of labels_comp: {len(labels_comp)}")
+    print(f"Length of masks: {len(masks)}")
+    print(f"obj_ids: {obj_ids}")
+    print(f"mask_comp shape: {mask_comp.shape}")
+    print(f"labels_comp: {labels_comp}")
+
+    if len(labels_comp) != len(obj_ids):
+        print("Error: Length of labels_comp does not match length of obj_ids")
+        print(f"labels_comp: {labels_comp}")
+        print(f"obj_ids: {obj_ids}")
+        return []
+
+    if len(labels_comp) != len(masks):
+        print("Error: Length of labels_comp does not match length of masks")
+        print(f"labels_comp: {labels_comp}")
+        print(f"masks shape: {masks.shape}")
+        return []
+
+    annotations_yolo = []
+    for i in range(len(labels_comp)):
+        if i >= len(masks):
+            print(f"Skipping index {i} as it is out of bounds for masks with length {len(masks)}")
+            continue
+        
+        try:
+            pos = np.where(masks[i])
+        except IndexError as e:
+            print(f"IndexError at i={i}: {e}")
+            continue
+        
+        if pos[0].size == 0 or pos[1].size == 0:  # Check if the object has any presence in the mask
+            print(f"No valid positions found for object index {i}")
+            continue
+        
+        xmin = np.min(pos[1])
+        xmax = np.max(pos[1])
+        ymin = np.min(pos[0])
+        ymax = np.max(pos[0])
+        
+        annotations_yolo.append([labels_comp[i], (xmin + xmax) / 2 / comp_w, (ymin + ymax) / 2 / comp_h, (xmax - xmin) / comp_w, (ymax - ymin) / comp_h])
+    
+    return annotations_yolo
 
 def generate_dataset(imgs_number: int, folder: str, split: str = "train") -> None:
     """
