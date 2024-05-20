@@ -20,6 +20,7 @@ class ImageMaskViewer:
         self.root.title("Image and Mask Viewer")
         self.directory = ""
         self.image_files: List[str] = []
+        self.image_ids: Dict[str, int] = {}
         self.current_index = 0
         self.config_file = config_file
         self.class_labels: List[str] = self.load_class_labels()
@@ -34,6 +35,12 @@ class ImageMaskViewer:
 
         self.mask_label = tk.Label(self.root)
         self.mask_label.pack(side="right", padx=10)
+
+        self.id_label = tk.Label(self.root, text="Image ID:")
+        self.id_label.pack()
+        
+        self.id_text = tk.Entry(self.root, state='readonly')
+        self.id_text.pack()
 
         self.radio_frame = tk.Frame(self.root)
         self.radio_frame.pack(pady=10)
@@ -54,7 +61,7 @@ class ImageMaskViewer:
         self.bottom_frame = tk.Frame(self.root)
         self.bottom_frame.pack(side="bottom", fill="x")
 
-        self.exit_button = tk.Button(self.bottom_frame, text="Exit", command=self.save_and_exit)
+        self.exit_button = tk.Button(self.bottom_frame, text="Save and Exit", command=self.save_and_exit)
         self.exit_button.pack(pady=20)
 
     def load_class_labels(self) -> List[str]:
@@ -76,6 +83,7 @@ class ImageMaskViewer:
         if not self.directory:
             return
         self.image_files = [f for f in os.listdir(self.directory) if f.endswith('.jpg')]
+        self.image_ids = {f: idx + 1 for idx, f in enumerate(self.image_files)}  # Assign a sequential ID to each image file
         self.current_index = 0
         self.show_image()
 
@@ -107,6 +115,13 @@ class ImageMaskViewer:
 
         self.image_label.config(image=self.image_tk)
         self.mask_label.config(image=self.mask_tk)
+
+        # Display the unique ID of the current image
+        image_id = self.image_ids[image_file]
+        self.id_text.config(state='normal')
+        self.id_text.delete(0, tk.END)
+        self.id_text.insert(0, str(image_id))
+        self.id_text.config(state='readonly')
 
     def save_current_pair(self) -> bool:
         """
@@ -154,6 +169,7 @@ class ImageMaskViewer:
         os.remove(mask_path)
 
         del self.image_files[self.current_index]
+        del self.image_ids[image_file]
 
         if self.current_index >= len(self.image_files):
             self.current_index = max(0, len(self.image_files) - 1)
