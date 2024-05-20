@@ -17,6 +17,11 @@ import time
 from colorama import init, Fore, Back, Style
 import warnings 
 import emoji
+import shutil
+from pyfiglet import Figlet
+
+f = Figlet(font='slant')
+print(f.renderText('DINOcut'))
 
 # Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
 warnings.filterwarnings("ignore")
@@ -56,7 +61,7 @@ parser.add_argument(
     "-src_dir",
     type=os.path.abspath,
     help="the source directory containing your images that you will use to generate masks",
-    default=os.path.abspath("images"),
+    default=os.path.abspath("scraped_images"),
 )
 
 parser.add_argument(
@@ -85,10 +90,10 @@ if args.src:
         + f"\n No source directory given. Main Path set to:", Fore.BLUE+f"{PATH_MAIN}", Fore.RED+"Please use python3 dino_sam.py -h to learn more.\n"
     )
 else:
-    PATH_MAIN = os.path.abspath("images")
+    PATH_MAIN = os.path.abspath("scraped_images")
     print(
         Back.GREEN
-        + f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more.\n"
+        + f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more\n"
     )
 
 def cuda_enabled() -> str:
@@ -553,10 +558,13 @@ def apply_mask(main_img: ndarray, mask_img: ndarray) -> ndarray:
 
     return masked_feature
 
-def main():
-    main_image_path = SOURCE_IMAGE_PATH
-    mask_directory = "/home/nalkuq/cmm"
-
+#this is a problem when you attempt to upload a directory. 
+#The problem originates with the SOURCE_IMAGE Path Variable 
+#Need to change this function. Work on this asap. 
+def main(path):
+    main_image_path = path
+    mask_directory = config["paths"]["home_directory"]
+    
     # Load the main image
     main_img = cv2.imread(main_image_path)
 
@@ -565,7 +573,6 @@ def main():
         raise FileNotFoundError(
             "The main image could not be loaded. Check the file path."
         )
-
     # Process each mask
     for mask_filename in os.listdir(mask_directory):
         if mask_filename.endswith(".png"):
@@ -588,12 +595,25 @@ def main():
             print(f"Saved {feature_img_path}")
 
 
+def main_test(image, mask):
+    main_image_path = image
+    mask_path = mask
+    # Load the main image
+    main_img = cv2.imread(main_image_path)
+    mask_img = cv2.imread(mask_path)
+    # Apply mask and create new image
+    feature_img = apply_mask(main_img, mask_img)
+    # Save the new image
+    feature_img_path = f"{mask_path[:-4]}.jpg"
+    cv2.imwrite(feature_img_path, feature_img)
+    print(f"Saved {feature_img_path}")
+
 if __name__ == "__main__":
     # load image
     print(Fore.BLUE+ "\nDINOCUT is detecting instances of:", Fore.GREEN+f"{CLASSES}")
     path=check_path(SOURCE_IMAGE_PATH)
     if isinstance(path, str): 
-        image = cv2.imread(SOURCE_IMAGE_PATH)
+        image = cv2.imread(path)
         detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
         print_emoji_line(":T-Rex:", 6)
         print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
@@ -607,15 +627,33 @@ if __name__ == "__main__":
             )
             show_sam_detections(image, detections, CLASSES)
             save_inverted_masks(detections.mask)
-            main()
+            main(path)
+            #need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder. 
+            directory=f"{path[:-4]}"
+            try:
+                os.mkdir(directory)
+                print(f"Making a directory named {directory} to save masks and labels.")
+            except:
+                pass 
+            #change to config file home directory. May have to also change argparse. 
+            os.chdir("/home/nalkuq/cmm")
+            cwd=os.getcwd()
+            for files in os.listdir(cwd): 
+                if files.endswith(".png"):
+                    shutil.move(files, directory)
+                if files.endswith(".jpg"):
+                    shutil.move(files, directory)
+                else: 
+                    print(files)
+                    pass
         except:
             print(Fore.RED+
                 f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
             )
     if isinstance(path, list): 
         for file in path:
-            image=file
-            image = cv2.imread(file)
+            path=file
+            image = cv2.imread(path)
             detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
             print_emoji_line(":T-Rex:", 6)
             print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
@@ -624,10 +662,28 @@ if __name__ == "__main__":
                 dino_display_image(image, detections, CLASSES)
                 detections.mask = segment(sam_predictor=sam_predictor,image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),xyxy=detections.xyxy,)
                 show_sam_detections(image, detections, CLASSES)
-                save_inverted_masks(detections.mask)
-                main()
+                mask=save_inverted_masks(detections.mask)
+                main(path)
+                #need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder. 
+                directory=f"{path[:-4]}"
+                try:
+                    os.mkdir(directory)
+                    print(f"Making a directory named {directory} to save masks and labels.")
+                except:
+                    pass 
+                #change to config file home directory. May have to also change argparse. 
+                os.chdir("/home/nalkuq/cmm")
+                cwd=os.getcwd()
+                for files in os.listdir(cwd): 
+                    if files.endswith(".png"):
+                        shutil.move(files, directory)
+                    if files.endswith(".jpg"):
+                        shutil.move(files, directory)
+                    else: 
+                        print(files)
+                        pass
             except:
                 print(Fore.RED+
                         f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
                     )
-            
+
