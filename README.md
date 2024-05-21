@@ -31,7 +31,7 @@ DINOcut is an AVCA image-processing pipeline that procedurally generates synthet
 ```
 Our original implementation uses [Li et al's 2021 BG-20K dataset](https://paperswithcode.com/dataset/bg-20k) accessible [here](https://drive.google.com/drive/folders/1ZBaMJxZtUNHIuGj8D8v3B9Adn8dbHwSS). 
 
-Distractor objects saved in the bg_noise directory should contain seperate folders for images and masks. You can download mask and image files for distactors from [shapenet])(https://shapenet.org/) or make your own. 
+Distractor objects saved in the bg_noise directory should contain seperate folders for images and masks. You can download mask and image files for distactors from [shapenet](https://shapenet.org/) or make your own. 
 
 3. Run DINOCUT from the command line: 
 ```bash
@@ -170,14 +170,10 @@ https://github.com/IDEA-Research/GroundingDINO/issues/193
 
 # Languages & Dependencies 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
- 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
-
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
 ![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)
 ![OpenCV](https://img.shields.io/badge/opencv-%23white.svg?style=for-the-badge&logo=opencv&logoColor=white)
-![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Vim](https://img.shields.io/badge/VIM-%2311AB00.svg?style=for-the-badge&logo=vim&logoColor=white)
-
+![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
