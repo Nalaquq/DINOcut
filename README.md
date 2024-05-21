@@ -5,12 +5,19 @@
 
 
 # 🦖 DinoCut ✂️
-
 [![YouTube](https://badges.aleen42.com/src/youtube.svg)](https://www.youtube.com/watch?v=Cf0wft5CKT4) [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1xbq9rEOtyQh8QUQU-__E-Ub3Wy3X1NoV)[![Static Badge](https://img.shields.io/badge/GroundingDINO-arXiv-blue)](https://arxiv.org/abs/2303.05499) [![Static Badge](https://img.shields.io/badge/Segment_Anything-arXiv-blue)](https://arxiv.org/abs/2304.02643) [![Static Badge](https://img.shields.io/badge/Cut_Paste_Learn-arXiv-blue)](https://arxiv.org/abs/1708.01642) [![Static Badge](https://img.shields.io/badge/Grounded_SAM-arXiv-blue)](https://arxiv.org/abs/2401.14159)
 
-
-
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
+
+#  About 
+
+DINOcut is an AVCA image-processing pipeline that procedurally generates synthetic datasets for object detection tasks using GroundingDINO, SAM, and Cut Paste Learn. When combined with popular deep learning frameworks for real-time object detectors, such as Recurrent Convolutional Neural Networks (RCNNs) and Single Shot Detectors (SSDs) DINOcut allows researchers to detect custom object classes in real-time (20fps) using social media video streams or image data.
+
+
+#  DEMO 
+
+[![DINOcut DEMO](assets/dinocut_video_thumbnail.png)](https://youtu.be/rYrzGJQ1-MY "DINOcut DEMO Video")
+
 
 #  Usage
 1. Modify dinocut_config.yaml to specify the paths for your input images, model parameters, and input prompts. 

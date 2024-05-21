@@ -15,25 +15,32 @@ import yaml
 from tqdm import tqdm
 import time
 from colorama import init, Fore, Back, Style
-import warnings 
+import warnings
 import emoji
 import shutil
 from pyfiglet import Figlet
 
-f = Figlet(font='slant')
-print(f.renderText('DINOcut'))
+f = Figlet(font="slant")
+print(f.renderText("DINOcut"))
 
 # Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
 warnings.filterwarnings("ignore")
 init()
 
+
 def check_path(path):
     if os.path.isfile(path):
         return path
     elif os.path.isdir(path):
-        return [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+        return [
+            os.path.join(path, f)
+            for f in os.listdir(path)
+            if os.path.isfile(os.path.join(path, f))
+        ]
     else:
-        raise ValueError("The provided path is neither a file nor a directory. Ensure that your source image path in DINOcut.yaml is correct")
+        raise ValueError(
+            "The provided path is neither a file nor a directory. Ensure that your source image path in DINOcut.yaml is correct"
+        )
 
 
 def print_emoji_line(emoji_code: str, repeat_count: int) -> None:
@@ -49,6 +56,7 @@ def print_emoji_line(emoji_code: str, repeat_count: int) -> None:
     """
     emoji_text = emoji.emojize(emoji_code)
     print("\n", emoji_text * repeat_count, "\n")
+
 
 print_emoji_line(":T-Rex:", 1)
 
@@ -87,8 +95,9 @@ args = parser.parse_args()
 if args.src:
     PATH_MAIN = args.src
     print(
-        Fore.RED
-        + f"\n No source directory given. Main Path set to:", Fore.BLUE+f"{PATH_MAIN}", Fore.RED+"Please use python3 dino_sam.py -h to learn more.\n"
+        Fore.RED + f"\n No source directory given. Main Path set to:",
+        Fore.BLUE + f"{PATH_MAIN}",
+        Fore.RED + "Please use python3 dino_sam.py -h to learn more.\n",
     )
 else:
     PATH_MAIN = os.path.abspath("starter_dataset")
@@ -96,6 +105,7 @@ else:
         Back.GREEN
         + f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more\n"
     )
+
 
 def cuda_enabled() -> str:
     """
@@ -150,6 +160,7 @@ def cuda_enabled() -> str:
 # Init CUDA
 print_emoji_line(":T-Rex:", 2)
 device = cuda_enabled()
+
 
 def load_configuration(yaml_path: str) -> Dict[str, Any]:
     """
@@ -215,6 +226,7 @@ def load_configuration(yaml_path: str) -> Dict[str, Any]:
 
     return config
 
+
 print_emoji_line(":T-Rex:", 3)
 # Example usage
 yaml_path = "dinocut_config.yaml"
@@ -252,22 +264,28 @@ BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
 TEXT_TRESHOLD = config["image_settings"]["thresholds"]["text"]
 
 
-
 print_emoji_line(":T-Rex:", 4)
-print(Fore.BLUE+ "\nChecking Config Settings:")
+print(Fore.BLUE + "\nChecking Config Settings:")
 print(
     Fore.GREEN + "\n\tGrounding DINO Checkpoint Path:",
-    Fore.RED+ config["paths"]["grounding_dino_checkpoint_path"],
+    Fore.RED + config["paths"]["grounding_dino_checkpoint_path"],
 )
-print(Fore.GREEN + "\tSAM Checkpoint Path:", Fore.RED+config["paths"]["sam_checkpoint_path"])
-print(Fore.GREEN + "\tBox Threshold:", Fore.RED+str(config["image_settings"]["thresholds"]["box"]))
-print(Fore.GREEN + "\tBox Threshold:", Fore.RED+str(config["image_settings"]["thresholds"]["text"]))
-print(Fore.GREEN + f"\tYour text prompt is:", Fore.RED+f"{CLASSES}")
-
-
 print(
-    Fore.GREEN + "\tImage Source Path:", Fore.RED+f"{SOURCE_IMAGE_PATH}"
+    Fore.GREEN + "\tSAM Checkpoint Path:",
+    Fore.RED + config["paths"]["sam_checkpoint_path"],
 )
+print(
+    Fore.GREEN + "\tBox Threshold:",
+    Fore.RED + str(config["image_settings"]["thresholds"]["box"]),
+)
+print(
+    Fore.GREEN + "\tBox Threshold:",
+    Fore.RED + str(config["image_settings"]["thresholds"]["text"]),
+)
+print(Fore.GREEN + f"\tYour text prompt is:", Fore.RED + f"{CLASSES}")
+
+
+print(Fore.GREEN + "\tImage Source Path:", Fore.RED + f"{SOURCE_IMAGE_PATH}")
 print_emoji_line(":T-Rex:", 5)
 
 
@@ -408,6 +426,7 @@ def dino_display_image(
     )
     sv.plot_image(annotated_frame, (16, 16))
 
+
 def segment(
     sam_predictor: SamPredictor, image: np.ndarray, xyxy: np.ndarray
 ) -> np.ndarray:
@@ -418,6 +437,7 @@ def segment(
         index = np.argmax(scores)
         result_masks.append(masks[index])
     return np.array(result_masks)
+
 
 def show_sam_detections(
     image: np.ndarray,
@@ -484,6 +504,7 @@ def show_sam_detections(
         CLASSES[d[3]] for d in detections
     ]  # Adjust this if the structure of detections differs
 
+
 def save_inverted_masks(detections: List[np.ndarray]) -> None:
     """
     Saves inverted color masks from a list of numpy arrays to separate PNG files.
@@ -500,7 +521,7 @@ def save_inverted_masks(detections: List[np.ndarray]) -> None:
     """
     for id, mask in enumerate(detections):
         # Convert the boolean mask to uint8 by multiplying by 255
-        id=time.time()
+        id = time.time()
         mask_to_save = (mask * 255).astype(np.uint8)
         # Invert the mask colors: foreground (object) becomes black, background becomes white
         inverted_mask = 255 - mask_to_save
@@ -508,6 +529,7 @@ def save_inverted_masks(detections: List[np.ndarray]) -> None:
         # Save the inverted mask using cv2.imwrite
         cv2.imwrite(mask_filename, inverted_mask)
         print(f"Saved inverted mask to {mask_filename}")
+
 
 def apply_mask(main_img: ndarray, mask_img: ndarray) -> ndarray:
     """
@@ -555,13 +577,14 @@ def apply_mask(main_img: ndarray, mask_img: ndarray) -> ndarray:
 
     return masked_feature
 
-#this is a problem when you attempt to upload a directory. 
-#The problem originates with the SOURCE_IMAGE Path Variable 
-#Need to change this function. Work on this asap. 
+
+# this is a problem when you attempt to upload a directory.
+# The problem originates with the SOURCE_IMAGE Path Variable
+# Need to change this function. Work on this asap.
 def create_training_image(path):
     main_image_path = path
     mask_directory = config["paths"]["home_directory"]
-    
+
     # Load the main image
     main_img = cv2.imread(main_image_path)
 
@@ -579,7 +602,7 @@ def create_training_image(path):
             # Ensure the mask image loaded correctly
             if mask_img is None:
                 raise FileNotFoundError(
-                   f"The mask image {mask_filename} could not be loaded. Check the file path."
+                    f"The mask image {mask_filename} could not be loaded. Check the file path."
                 )
 
             # Apply mask and create new image
@@ -590,15 +613,19 @@ def create_training_image(path):
             cv2.imwrite(feature_img_path, feature_img)
             print(f"Saved {feature_img_path}")
 
+
 def dinocut_generate():
     # load image
-    print(Fore.BLUE+ "\nDINOCUT is detecting instances of:", Fore.GREEN+f"{CLASSES}")
-    path=check_path(SOURCE_IMAGE_PATH)
-    if isinstance(path, str): 
+    print(Fore.BLUE + "\nDINOCUT is detecting instances of:", Fore.GREEN + f"{CLASSES}")
+    path = check_path(SOURCE_IMAGE_PATH)
+    if isinstance(path, str):
         image = cv2.imread(path)
         detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
         print_emoji_line(":T-Rex:", 6)
-        print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
+        print(
+            Fore.BLUE + "\nDINOCUT is segmenting all detections for:",
+            Fore.GREEN + f"{CLASSES}",
+        )
         print_emoji_line(":T-Rex:", 7)
         try:
             dino_display_image(image, detections, CLASSES)
@@ -610,63 +637,83 @@ def dinocut_generate():
             show_sam_detections(image, detections, CLASSES)
             save_inverted_masks(detections.mask)
             create_training_image(path)
-            #need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder. 
-            directory=f"{path[:-4]}"
+            # need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder.
+            directory = f"{path[:-4]}"
             try:
                 os.mkdir(directory)
                 print(f"Making a directory named {directory} to save masks and labels.")
             except:
-                pass 
-            #change to config file home directory. May have to also change argparse. 
+                pass
+            # change to config file home directory. May have to also change argparse.
             os.chdir("/home/nalkuq/cmm")
-            cwd=os.getcwd()
-            for files in os.listdir(cwd): 
+            cwd = os.getcwd()
+            for files in os.listdir(cwd):
                 if files.endswith(".png"):
                     shutil.move(files, directory)
                 if files.endswith(".jpg"):
                     shutil.move(files, directory)
-                else: 
+                else:
                     pass
         except:
-            print(Fore.RED+
-                f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
+            print(
+                Fore.RED + f"\nDinoCut was unable to find any instances of:",
+                Fore.BLUE + f"{CLASSES}",
+                Fore.RED
+                + "\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.",
             )
-    if isinstance(path, list): 
+    if isinstance(path, list):
         for file in path:
-            path=file
+            path = file
             image = cv2.imread(path)
             detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
             print_emoji_line(":T-Rex:", 6)
-            print(Fore.BLUE+ "\nDINOCUT is segmenting all detections for:", Fore.GREEN+f"{CLASSES}")
+            print(
+                Fore.BLUE + "\nDINOCUT is segmenting all detections for:",
+                Fore.GREEN + f"{CLASSES}",
+            )
             print_emoji_line(":T-Rex:", 7)
             try:
                 dino_display_image(image, detections, CLASSES)
-                detections.mask = segment(sam_predictor=sam_predictor,image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),xyxy=detections.xyxy,)
+                detections.mask = segment(
+                    sam_predictor=sam_predictor,
+                    image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
+                    xyxy=detections.xyxy,
+                )
                 show_sam_detections(image, detections, CLASSES)
-                mask=save_inverted_masks(detections.mask)
+                mask = save_inverted_masks(detections.mask)
                 create_training_image(path)
-                directory=f"{path[:-4]}"
+                directory = f"{path[:-4]}"
                 try:
                     os.mkdir(directory)
-                    print(f"Making a directory named {directory} to save masks and labels.")
+                    print(
+                        f"Making a directory named {directory} to save masks and labels."
+                    )
                 except:
-                    pass 
-                #change to config file home directory. May have to also change argparse. 
+                    pass
+                # change to config file home directory. May have to also change argparse.
                 os.chdir("/home/nalkuq/cmm")
-                cwd=os.getcwd()
-                for files in os.listdir(cwd): 
+                cwd = os.getcwd()
+                for files in os.listdir(cwd):
                     if files.endswith(".png"):
                         shutil.move(files, directory)
                     if files.endswith(".jpg"):
                         shutil.move(files, directory)
-                    else: 
+                    else:
                         pass
             except:
-                print(Fore.RED+
-                        f"\nDinoCut was unable to find any instances of:", Fore.BLUE+ f"{CLASSES}", Fore.RED+"\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml."
-                    )
+                print(
+                    Fore.RED + f"\nDinoCut was unable to find any instances of:",
+                    Fore.BLUE + f"{CLASSES}",
+                    Fore.RED
+                    + "\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.",
+                )
+
 
 if __name__ == "__main__":
-    #dinocut_generate()
-    #os.system("python3 scripts/selector.py --directory /home/nalkuq/cmm/starter_dataset --target-directory /home/nalkuq/cmm/data" )
-    os.system("python3 scripts/synthetic_fixed_1.py")
+    dinocut_generate()
+    os.system(
+        "python3 scripts/selector.py --directory /home/nalkuq/cmm/starter_dataset --target-directory /home/nalkuq/cmm/data"
+    )
+    os.system(
+        f'python3 scripts/synthetic.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
+    )

@@ -11,14 +11,20 @@ model_configs:
     checkpoint_path: "sam_vit_h_4b8939.pth"
 
 image_settings:
-  source_image_path: "starter_dataset" # can be either a directory or a single image
+  source_image_path: "starter_dataset" # can be either a directory or a single image. Place images for DINOcut to extract here. 
+  number: 20 #The number of synthetic images to be generated. Images will be generated according to a 80/20/20 Train/Test/Val split
+  image_overlap: 0 #The degree of overlap randomly interpolated by the generator. Set to 0 if you do not want any overlapping images.
+  max_obj: 10 #The maxinum number of objects to be placed in the scene by the generator.
+  min_size: 150 # 
+  max_size: 800 #he maximum size of generated images. The defauly is 800px. An error will occur if a max size is selected that is larger than the background image size.
+  erase: True # Boolean value that deletes all files in dataset directory before generation. Default is True. 
   classes:
     - "spongebob squarepants"
-    - "semilunar knife" # change for each class in the object detector. Must be a qualitative label in lowercase. 
-  thresholds:
+    - "patrick starfish" # change for each class in the object detector. Must be a qualitative label in lowercase. 
+  thresholds: #The text and box thresholds used by GroundingDINO and SAM to extract features using zero-shot detection
     box: 0.30
     text: 0.20
-  format: yolo #select between yolo, coco, and voc label formats
+  format: yolo ##The annotation style for synthetic data generation. Optoins include voc, coc, and yolo (all lowercase strings). Default is set to yolo.
 
 #Augmentatoin settings for Augmentations Python Library
 transforms_bg_obj:
