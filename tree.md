@@ -132,8 +132,19 @@
 │   ├── test.ipynb
 │   └── weights
 │       └── groundingdino_swint_ogc.pth
-├── config.yaml
-├── cv.py
+├── LICENSE
+├── README.md
+├── assets
+│   ├── DINOcut fig 1.png
+│   ├── DINOcut_thumbnail.png
+│   ├── dinocut_video_thumbnail.png
+│   └── examples
+│       └── images
+│           ├── Original.jpg
+│           ├── beach spongebob caveman meme.png
+│           ├── spongebob caveman meme.jpg
+│           └── spongebob mocking meme.jpg
+├── citation.cff
 ├── data
 │   ├── background
 │   │   ├── h_00168a88.jpg
@@ -2301,360 +2312,319 @@
 │   │       ├── 97.png
 │   │       ├── 98.png
 │   │       └── 99.png
-│   ├── caveg
-│   │   ├── images
-│   │   │   ├── 001_caveg.jpg
-│   │   │   ├── 002_caveg.jpg
-│   │   │   ├── 003_caveg.jpg
-│   │   │   ├── 004_caveg.jpg
-│   │   │   ├── 005_caveg.jpg
-│   │   │   ├── 006_caveg.jpg
-│   │   │   ├── 007_caveg.jpg
-│   │   │   ├── 008_caveg.jpg
-│   │   │   ├── 009_caveg.jpg
-│   │   │   ├── 010_caveg.jpg
-│   │   │   ├── 011_caveg.jpg
-│   │   │   ├── 012_caveg.jpg
-│   │   │   ├── 013_caveg.jpg
-│   │   │   ├── 014_caveg.jpg
-│   │   │   ├── 015_caveg.jpg
-│   │   │   ├── 016_caveg.jpg
-│   │   │   ├── 017_caveg.jpg
-│   │   │   ├── 018_caveg.jpg
-│   │   │   ├── 019_caveg.jpg
-│   │   │   ├── 020_caveg.jpg
-│   │   │   ├── 021_caveg.jpg
-│   │   │   ├── 022_caveg.jpg
-│   │   │   ├── 023_caveg.jpg
-│   │   │   ├── 024_caveg.jpg
-│   │   │   ├── 025_caveg.jpg
-│   │   │   ├── 026_caveg.jpg
-│   │   │   ├── 027_caveg.jpg
-│   │   │   ├── 028_caveg.jpg
-│   │   │   ├── 029_caveg.jpg
-│   │   │   ├── 030_caveg.jpg
-│   │   │   ├── 031_caveg.jpg
-│   │   │   ├── 032_caveg.jpg
-│   │   │   ├── 033_caveg.jpg
-│   │   │   ├── 034_caveg.jpg
-│   │   │   ├── 035_caveg.jpg
-│   │   │   ├── 036_caveg.jpg
-│   │   │   ├── 037_caveg.jpg
-│   │   │   ├── 038_caveg.jpg
-│   │   │   ├── 039_caveg.jpg
-│   │   │   ├── 040_caveg.jpg
-│   │   │   ├── 041_caveg.jpg
-│   │   │   ├── 042_caveg.jpg
-│   │   │   ├── 043_caveg.jpg
-│   │   │   ├── 044_caveg.jpg
-│   │   │   ├── 045_caveg.jpg
-│   │   │   ├── 046_caveg.jpg
-│   │   │   ├── 047_caveg.jpg
-│   │   │   ├── 048_caveg.jpg
-│   │   │   ├── 049_caveg.jpg
-│   │   │   ├── 050_caveg.jpg
-│   │   │   ├── 051_caveg.jpg
-│   │   │   └── 052_caveg.jpg
-│   │   └── masks
-│   │       ├── 001_caveg.png
-│   │       ├── 002_caveg.png
-│   │       ├── 003_caveg.png
-│   │       ├── 004_caveg.png
-│   │       ├── 005_caveg.png
-│   │       ├── 006_caveg.png
-│   │       ├── 007_caveg.png
-│   │       ├── 008_caveg.png
-│   │       ├── 009_caveg.png
-│   │       ├── 010_caveg.png
-│   │       ├── 011_caveg.png
-│   │       ├── 012_caveg.png
-│   │       ├── 013_caveg.png
-│   │       ├── 014_caveg.png
-│   │       ├── 015_caveg.png
-│   │       ├── 016_caveg.png
-│   │       ├── 017_caveg.png
-│   │       ├── 018_caveg.png
-│   │       ├── 019_caveg.png
-│   │       ├── 020_caveg.png
-│   │       ├── 021_caveg.png
-│   │       ├── 022_caveg.png
-│   │       ├── 023_caveg.png
-│   │       ├── 024_caveg.png
-│   │       ├── 025_caveg.png
-│   │       ├── 026_caveg.png
-│   │       ├── 027_caveg.png
-│   │       ├── 028_caveg.png
-│   │       ├── 029_caveg.png
-│   │       ├── 030_caveg.png
-│   │       ├── 031_caveg.png
-│   │       ├── 032_caveg.png
-│   │       ├── 033_caveg.png
-│   │       ├── 034_caveg.png
-│   │       ├── 035_caveg.png
-│   │       ├── 036_caveg.png
-│   │       ├── 037_caveg.png
-│   │       ├── 038_caveg.png
-│   │       ├── 039_caveg.png
-│   │       ├── 040_caveg.png
-│   │       ├── 041_caveg.png
-│   │       ├── 042_caveg.png
-│   │       ├── 043_caveg.png
-│   │       ├── 044_caveg.png
-│   │       ├── 045_caveg.png
-│   │       ├── 046_caveg.png
-│   │       ├── 047_caveg.png
-│   │       ├── 048_caveg.png
-│   │       ├── 049_caveg.png
-│   │       ├── 050_caveg.png
-│   │       ├── 051_caveg.png
-│   │       └── 052_caveg.png
-│   ├── endblades
-│   │   ├── images
-│   │   │   ├── 001_endblade.jpg
-│   │   │   ├── 002_endblade.jpg
-│   │   │   ├── 003_endblade.jpg
-│   │   │   ├── 004_endblade.jpg
-│   │   │   ├── 005_endblade.jpg
-│   │   │   ├── 006_endblade.jpg
-│   │   │   ├── 007_endblade.jpg
-│   │   │   ├── 008_endblade.jpg
-│   │   │   ├── 009_endblade.jpg
-│   │   │   ├── 010_endblade.jpg
-│   │   │   ├── 011_endblade.jpg
-│   │   │   ├── 012_endblade.jpg
-│   │   │   ├── 013_endblade.jpg
-│   │   │   ├── 014_endblade.jpg
-│   │   │   ├── 015_endblade.jpg
-│   │   │   ├── 016_endblade.jpg
-│   │   │   ├── 017_endblade.jpg
-│   │   │   ├── 018_endblade.jpg
-│   │   │   ├── 019_endblade.jpg
-│   │   │   ├── 020_endblade.jpg
-│   │   │   ├── 021_endblade.jpg
-│   │   │   ├── 022_endblade.jpg
-│   │   │   ├── 023_endblade.jpg
-│   │   │   ├── 024_endblade.jpg
-│   │   │   ├── 025_endblade.jpg
-│   │   │   ├── 026_endblade.jpg
-│   │   │   ├── 027_endblade.jpg
-│   │   │   ├── 028_endblade.jpg
-│   │   │   ├── 029_endblade.jpg
-│   │   │   ├── 030_endblade.jpg
-│   │   │   ├── 031_endblade.jpg
-│   │   │   ├── 032_endblade.jpg
-│   │   │   ├── 033_endblade.jpg
-│   │   │   ├── 034_endblade.jpg
-│   │   │   ├── 035_endblade.jpg
-│   │   │   ├── 036_endblade.jpg
-│   │   │   ├── 037_endblade.jpg
-│   │   │   ├── 038_endblade.jpg
-│   │   │   ├── 039_endblade.jpg
-│   │   │   ├── 040_endblade.jpg
-│   │   │   ├── 041_endblade.jpg
-│   │   │   ├── 042_endblade.jpg
-│   │   │   ├── 043_endblade.jpg
-│   │   │   ├── 044_endblade.jpg
-│   │   │   ├── 045_endblade.jpg
-│   │   │   └── 046_endblade.jpg
-│   │   └── masks
-│   │       ├── 001_endblade.png
-│   │       ├── 002_endblade.png
-│   │       ├── 003_endblade.png
-│   │       ├── 004_endblade.png
-│   │       ├── 005_endblade.png
-│   │       ├── 006_endblade.png
-│   │       ├── 007_endblade.png
-│   │       ├── 008_endblade.png
-│   │       ├── 009_endblade.png
-│   │       ├── 010_endblade.png
-│   │       ├── 011_endblade.png
-│   │       ├── 012_endblade.png
-│   │       ├── 013_endblade.png
-│   │       ├── 014_endblade.png
-│   │       ├── 015_endblade.png
-│   │       ├── 016_endblade.png
-│   │       ├── 017_endblade.png
-│   │       ├── 018_endblade.png
-│   │       ├── 019_endblade.png
-│   │       ├── 020_endblade.png
-│   │       ├── 021_endblade.png
-│   │       ├── 022_endblade.png
-│   │       ├── 023_endblade.png
-│   │       ├── 024_endblade.png
-│   │       ├── 025_endblade.png
-│   │       ├── 026_endblade.png
-│   │       ├── 027_endblade.png
-│   │       ├── 028_endblade.png
-│   │       ├── 029_endblade.png
-│   │       ├── 030_endblade.png
-│   │       ├── 031_endblade.png
-│   │       ├── 032_endblade.png
-│   │       ├── 033_endblade.png
-│   │       ├── 034_endblade.png
-│   │       ├── 035_endblade.png
-│   │       ├── 036_endblade.png
-│   │       ├── 037_endblade.png
-│   │       ├── 038_endblade.png
-│   │       ├── 039_endblade.png
-│   │       ├── 040_endblade.png
-│   │       ├── 041_endblade.png
-│   │       ├── 042_endblade.png
-│   │       ├── 043_endblade.png
-│   │       ├── 044_endblade.png
-│   │       ├── 045_endblade.png
-│   │       └── 046_endblade.png
-│   ├── tops
-│   │   ├── images
-│   │   │   ├── 001_top.jpg
-│   │   │   ├── 002_top.jpg
-│   │   │   ├── 003_top.jpg
-│   │   │   ├── 004_top.jpg
-│   │   │   ├── 005_top.jpg
-│   │   │   ├── 006_top.jpg
-│   │   │   ├── 007_top.jpg
-│   │   │   ├── 008_top.jpg
-│   │   │   ├── 009_top.jpg
-│   │   │   ├── 010_top.jpg
-│   │   │   ├── 011_top.jpg
-│   │   │   └── 012_top.jpg
-│   │   └── masks
-│   │       ├── 001_top.png
-│   │       ├── 002_top.png
-│   │       ├── 003_top.png
-│   │       ├── 004_top.png
-│   │       ├── 005_top.png
-│   │       ├── 006_top.png
-│   │       ├── 007_top.png
-│   │       ├── 008_top.png
-│   │       ├── 009_top.png
-│   │       ├── 010_top.png
-│   │       ├── 011_top.png
-│   │       └── 012_top.png
-│   └── ulus
-│       ├── 001_ulu.jpg
-│       ├── 001_ulu.png
-│       ├── 002_ulu.jpg
-│       ├── 002_ulu.png
-│       ├── 003_ulu.jpg
-│       ├── 003_ulu.png
-│       ├── 004_ulu.jpg
-│       ├── 004_ulu.png
-│       ├── 005_ulu.jpg
-│       ├── 005_ulu.png
-│       ├── 006_ulu.jpg
-│       ├── 006_ulu.png
-│       ├── 007_ulu.jpg
-│       ├── 007_ulu.png
-│       ├── 008_ulu.jpg
-│       ├── 008_ulu.png
-│       ├── 009_ulu.jpg
-│       ├── 009_ulu.png
-│       ├── 010_ulu.jpg
-│       ├── 010_ulu.png
-│       ├── 011_ulu.jpg
-│       ├── 011_ulu.png
-│       ├── 012_ulu.jpg
-│       ├── 012_ulu.png
-│       ├── 013_ulu.jpg
-│       ├── 013_ulu.png
-│       ├── 014_ulu.jpg
-│       ├── 014_ulu.png
-│       ├── 015_ulu.jpg
-│       ├── 015_ulu.png
-│       ├── 016_ulu.jpg
-│       ├── 016_ulu.png
-│       ├── 017_ulu.jpg
-│       ├── 017_ulu.png
-│       ├── 018_ulu.jpg
-│       ├── 018_ulu.png
-│       ├── Seal_Uluaq_27906.glb
-│       ├── Small_Uluaq_27747.glb
-│       ├── Small_Uluaq_76594.glb
-│       ├── Small_Uluaq_76598.glb
-│       ├── Small_Uluaq_77866.glb
-│       ├── Uluaq_12147.glb
-│       ├── Uluaq_21182.glb
-│       ├── Uluaq_21239.glb
-│       ├── Uluaq_25215.glb
-│       ├── Uluaq_25216.glb
-│       ├── Uluaq_27858.glb
-│       ├── Uluaq_27859.glb
-│       ├── Uluaq_75341.glb
-│       ├── Uluaq_76593.glb
-│       ├── Uluaq_76656.glb
-│       ├── Uluaq_76702.glb
-│       ├── Uluaq_with_Inlays_27926.glb
+│   └── spongebob squarepants
 │       ├── images
-│       │   ├── 001_ulu.jpg
-│       │   ├── 002_ulu.jpg
-│       │   ├── 003_ulu.jpg
-│       │   ├── 004_ulu.jpg
-│       │   ├── 005_ulu.jpg
-│       │   ├── 006_ulu.jpg
-│       │   ├── 007_ulu.jpg
-│       │   ├── 008_ulu.jpg
-│       │   ├── 009_ulu.jpg
-│       │   ├── 010_ulu.jpg
-│       │   ├── 011_ulu.jpg
-│       │   ├── 012_ulu.jpg
-│       │   ├── 013_ulu.jpg
-│       │   ├── 014_ulu.jpg
-│       │   ├── 015_ulu.jpg
-│       │   ├── 016_ulu.jpg
-│       │   ├── 017_ulu.jpg
-│       │   └── 018_ulu.jpg
+│       │   ├── mask_1716316134.1007862.jpg
+│       │   ├── mask_1716316135.9494364.jpg
+│       │   ├── mask_1716316135.9548419.jpg
+│       │   ├── mask_1716316135.9591892.jpg
+│       │   ├── mask_1716316137.7953784.jpg
+│       │   ├── mask_1716316139.6106343.jpg
+│       │   ├── mask_1716316141.4051301.jpg
+│       │   ├── mask_1716316143.1831496.jpg
+│       │   ├── mask_1716316144.9469962.jpg
+│       │   ├── mask_1716316144.9495645.jpg
+│       │   ├── mask_1716316148.5733497.jpg
+│       │   ├── mask_1716316150.3996181.jpg
+│       │   ├── mask_1716316152.343271.jpg
+│       │   ├── mask_1716316154.2007477.jpg
+│       │   ├── mask_1716316156.0200717.jpg
+│       │   ├── mask_1716316156.022561.jpg
+│       │   ├── mask_1716316159.6282556.jpg
+│       │   ├── mask_1716316159.6357243.jpg
+│       │   ├── mask_1716316161.4797115.jpg
+│       │   ├── mask_1716316163.3677652.jpg
+│       │   ├── mask_1716316167.055125.jpg
+│       │   ├── mask_1716316167.0578735.jpg
+│       │   ├── mask_1716316168.910109.jpg
+│       │   ├── mask_1716316170.777687.jpg
+│       │   ├── mask_1716316170.7816465.jpg
+│       │   ├── mask_1716316170.7886298.jpg
+│       │   ├── mask_1716316172.7524352.jpg
+│       │   ├── mask_1716316172.7537143.jpg
+│       │   ├── mask_1716316174.5514112.jpg
+│       │   ├── mask_1716316176.3792655.jpg
+│       │   ├── mask_1716316178.1659486.jpg
+│       │   ├── mask_1716316179.9831777.jpg
+│       │   ├── mask_1716316181.8006756.jpg
+│       │   ├── mask_1716316181.8036337.jpg
+│       │   ├── mask_1716316181.8082845.jpg
+│       │   ├── mask_1716316183.7134075.jpg
+│       │   ├── mask_1716316185.8798008.jpg
+│       │   ├── mask_1716316185.9018035.jpg
+│       │   ├── mask_1716316187.9234266.jpg
+│       │   ├── mask_1716316189.6996224.jpg
+│       │   ├── mask_1716316189.7029386.jpg
+│       │   ├── mask_1716316191.556611.jpg
+│       │   ├── mask_1716316191.565025.jpg
+│       │   ├── mask_1716316193.6316466.jpg
+│       │   ├── mask_1716316193.659677.jpg
+│       │   ├── mask_1716316195.8745577.jpg
+│       │   ├── mask_1716316195.8787906.jpg
+│       │   ├── mask_1716316200.047959.jpg
+│       │   ├── mask_1716316202.2238634.jpg
+│       │   ├── mask_1716414064.2859101.jpg
+│       │   ├── mask_1716414067.777272.jpg
+│       │   ├── mask_1716414067.781583.jpg
+│       │   ├── mask_1716414067.7850535.jpg
+│       │   ├── mask_1716414070.4897993.jpg
+│       │   ├── mask_1716414074.2078822.jpg
+│       │   ├── mask_1716414076.109975.jpg
+│       │   ├── mask_1716414077.8861163.jpg
+│       │   ├── mask_1716414077.8901498.jpg
+│       │   ├── mask_1716414081.2863877.jpg
+│       │   ├── mask_1716414082.9417942.jpg
+│       │   ├── mask_1716414084.7295563.jpg
+│       │   ├── mask_1716414086.4799194.jpg
+│       │   ├── mask_1716414088.2072947.jpg
+│       │   ├── mask_1716414091.6795962.jpg
+│       │   ├── mask_1716414091.6879125.jpg
+│       │   ├── mask_1716414093.4947336.jpg
+│       │   ├── mask_1716414095.3675084.jpg
+│       │   ├── mask_1716414098.8783185.jpg
+│       │   ├── mask_1716414098.88179.jpg
+│       │   ├── mask_1716414100.6519256.jpg
+│       │   ├── mask_1716414102.5125604.jpg
+│       │   ├── mask_1716414102.5163684.jpg
+│       │   ├── mask_1716414102.5238783.jpg
+│       │   ├── mask_1716414104.3656604.jpg
+│       │   ├── mask_1716414104.3670034.jpg
+│       │   ├── mask_1716414108.0295444.jpg
+│       │   ├── mask_1716414109.785466.jpg
+│       │   ├── mask_1716414111.6054618.jpg
+│       │   ├── mask_1716414113.4443505.jpg
+│       │   ├── mask_1716414113.4476428.jpg
+│       │   ├── mask_1716414113.454051.jpg
+│       │   ├── mask_1716414115.4445796.jpg
+│       │   ├── mask_1716414117.6426528.jpg
+│       │   ├── mask_1716414117.6616898.jpg
+│       │   ├── mask_1716414119.7326884.jpg
+│       │   ├── mask_1716414121.6073024.jpg
+│       │   ├── mask_1716414121.6102695.jpg
+│       │   ├── mask_1716414123.459832.jpg
+│       │   ├── mask_1716414123.4671717.jpg
+│       │   ├── mask_1716414125.39001.jpg
+│       │   ├── mask_1716414125.41665.jpg
+│       │   ├── mask_1716414127.4551125.jpg
+│       │   ├── mask_1716414127.459026.jpg
+│       │   ├── mask_1716414131.3205714.jpg
+│       │   └── mask_1716414133.3473809.jpg
 │       └── masks
-│           ├── 001_ulu.png
-│           ├── 002_ulu.png
-│           ├── 003_ulu.png
-│           ├── 004_ulu.png
-│           ├── 005_ulu.png
-│           ├── 006_ulu.png
-│           ├── 007_ulu.png
-│           ├── 008_ulu.png
-│           ├── 009_ulu.png
-│           ├── 010_ulu.png
-│           ├── 011_ulu.png
-│           ├── 012_ulu.png
-│           ├── 013_ulu.png
-│           ├── 014_ulu.png
-│           ├── 015_ulu.png
-│           ├── 016_ulu.png
-│           ├── 017_ulu.png
-│           └── 018_ulu.png
+│           ├── mask_1716316134.1007862.png
+│           ├── mask_1716316135.9494364.png
+│           ├── mask_1716316135.9548419.png
+│           ├── mask_1716316135.9591892.png
+│           ├── mask_1716316137.7953784.png
+│           ├── mask_1716316139.6106343.png
+│           ├── mask_1716316141.4051301.png
+│           ├── mask_1716316143.1831496.png
+│           ├── mask_1716316144.9469962.png
+│           ├── mask_1716316144.9495645.png
+│           ├── mask_1716316148.5733497.png
+│           ├── mask_1716316150.3996181.png
+│           ├── mask_1716316152.343271.png
+│           ├── mask_1716316154.2007477.png
+│           ├── mask_1716316156.0200717.png
+│           ├── mask_1716316156.022561.png
+│           ├── mask_1716316159.6282556.png
+│           ├── mask_1716316159.6357243.png
+│           ├── mask_1716316161.4797115.png
+│           ├── mask_1716316163.3677652.png
+│           ├── mask_1716316167.055125.png
+│           ├── mask_1716316167.0578735.png
+│           ├── mask_1716316168.910109.png
+│           ├── mask_1716316170.777687.png
+│           ├── mask_1716316170.7816465.png
+│           ├── mask_1716316170.7886298.png
+│           ├── mask_1716316172.7524352.png
+│           ├── mask_1716316172.7537143.png
+│           ├── mask_1716316174.5514112.png
+│           ├── mask_1716316176.3792655.png
+│           ├── mask_1716316178.1659486.png
+│           ├── mask_1716316179.9831777.png
+│           ├── mask_1716316181.8006756.png
+│           ├── mask_1716316181.8036337.png
+│           ├── mask_1716316181.8082845.png
+│           ├── mask_1716316183.7134075.png
+│           ├── mask_1716316185.8798008.png
+│           ├── mask_1716316185.9018035.png
+│           ├── mask_1716316187.9234266.png
+│           ├── mask_1716316189.6996224.png
+│           ├── mask_1716316189.7029386.png
+│           ├── mask_1716316191.556611.png
+│           ├── mask_1716316191.565025.png
+│           ├── mask_1716316193.6316466.png
+│           ├── mask_1716316193.659677.png
+│           ├── mask_1716316195.8745577.png
+│           ├── mask_1716316195.8787906.png
+│           ├── mask_1716316200.047959.png
+│           ├── mask_1716316202.2238634.png
+│           ├── mask_1716414064.2859101.png
+│           ├── mask_1716414067.777272.png
+│           ├── mask_1716414067.781583.png
+│           ├── mask_1716414067.7850535.png
+│           ├── mask_1716414070.4897993.png
+│           ├── mask_1716414074.2078822.png
+│           ├── mask_1716414076.109975.png
+│           ├── mask_1716414077.8861163.png
+│           ├── mask_1716414077.8901498.png
+│           ├── mask_1716414081.2863877.png
+│           ├── mask_1716414082.9417942.png
+│           ├── mask_1716414084.7295563.png
+│           ├── mask_1716414086.4799194.png
+│           ├── mask_1716414088.2072947.png
+│           ├── mask_1716414091.6795962.png
+│           ├── mask_1716414091.6879125.png
+│           ├── mask_1716414093.4947336.png
+│           ├── mask_1716414095.3675084.png
+│           ├── mask_1716414098.8783185.png
+│           ├── mask_1716414098.88179.png
+│           ├── mask_1716414100.6519256.png
+│           ├── mask_1716414102.5125604.png
+│           ├── mask_1716414102.5163684.png
+│           ├── mask_1716414102.5238783.png
+│           ├── mask_1716414104.3656604.png
+│           ├── mask_1716414104.3670034.png
+│           ├── mask_1716414108.0295444.png
+│           ├── mask_1716414109.785466.png
+│           ├── mask_1716414111.6054618.png
+│           ├── mask_1716414113.4443505.png
+│           ├── mask_1716414113.4476428.png
+│           ├── mask_1716414113.454051.png
+│           ├── mask_1716414115.4445796.png
+│           ├── mask_1716414117.6426528.png
+│           ├── mask_1716414117.6616898.png
+│           ├── mask_1716414119.7326884.png
+│           ├── mask_1716414121.6073024.png
+│           ├── mask_1716414121.6102695.png
+│           ├── mask_1716414123.459832.png
+│           ├── mask_1716414123.4671717.png
+│           ├── mask_1716414125.39001.png
+│           ├── mask_1716414125.41665.png
+│           ├── mask_1716414127.4551125.png
+│           ├── mask_1716414127.459026.png
+│           ├── mask_1716414131.3205714.png
+│           └── mask_1716414133.3473809.png
 ├── dataset
+│   ├── classes.yaml
 │   ├── test
 │   │   ├── images
-│   │   │   ├── 02024_04_25-05_54_26_PM.jpg
-│   │   │   ├── 12024_04_25-05_54_26_PM.jpg
-│   │   │   └── 22024_04_25-05_54_26_PM.jpg
+│   │   │   ├── 02024_05_22-05_48_56_PM.jpg
+│   │   │   └── 12024_05_22-05_48_56_PM.jpg
 │   │   └── labels
-│   │       ├── 02024_04_25-05_54_26_PM.txt
-│   │       ├── 12024_04_25-05_54_26_PM.txt
-│   │       └── 22024_04_25-05_54_26_PM.txt
+│   │       ├── 02024_05_22-05_48_56_PM.txt
+│   │       └── 12024_05_22-05_48_56_PM.txt
 │   ├── train
 │   │   ├── images
-│   │   ├── labels
-│   │   └── labels.cache
+│   │   │   ├── 02024_05_22-05_49_01_PM.jpg
+│   │   │   ├── 12024_05_22-05_49_01_PM.jpg
+│   │   │   ├── 22024_05_22-05_49_01_PM.jpg
+│   │   │   ├── 32024_05_22-05_49_01_PM.jpg
+│   │   │   └── 42024_05_22-05_49_01_PM.jpg
+│   │   └── labels
+│   │       ├── 02024_05_22-05_49_01_PM.txt
+│   │       ├── 12024_05_22-05_49_01_PM.txt
+│   │       ├── 22024_05_22-05_49_01_PM.txt
+│   │       ├── 32024_05_22-05_49_01_PM.txt
+│   │       └── 42024_05_22-05_49_01_PM.txt
 │   └── val
 │       ├── images
-│       ├── labels
-│       └── labels.cache
-├── dino_sam.py
-├── examples
-│   └── images
-│       ├── spongebob caveman meme.jpg
-│       ├── spongebob caveman meme.jpg:Zone.Identifier
-│       ├── spongebob mocking meme.jpg
-│       └── spongebob mocking meme.jpg:Zone.Identifier
+│       │   ├── 02024_05_22-05_48_58_PM.jpg
+│       │   └── 12024_05_22-05_48_58_PM.jpg
+│       └── labels
+│           ├── 02024_05_22-05_48_58_PM.txt
+│           └── 12024_05_22-05_48_58_PM.txt
+├── dinocut.py
+├── dinocut_config.yaml
 ├── requirements.txt
 ├── sam
 │   └── weights
 │       └── sam_vit_h_4b8939.pth
-├── sam.py
+├── scripts
+│   ├── figures.py
+│   ├── selector.py
+│   ├── synthetic.py
+│   ├── synthetic_config.yaml
+│   └── visualize.py
 ├── setup.py
-├── synthetic.py
+├── starter_dataset
+│   ├── 2z8yr3jk901d1
+│   ├── 2z8yr3jk901d1.jpg
+│   ├── 30_days_of_drawing___spongebob_squarepants_by_minecraftman1000_dftaeyh-pre
+│   ├── 30_days_of_drawing___spongebob_squarepants_by_minecraftman1000_dftaeyh-pre.jpg
+│   ├── 6fcy962sqd1d1.
+│   ├── 6fcy962sqd1d1.jpeg
+│   ├── 7vbul8fikk1d1.
+│   ├── 7vbul8fikk1d1.jpeg
+│   ├── Caveman-SpongeBob
+│   ├── Caveman-SpongeBob.jpg
+│   ├── Grumpy-SpongeBob
+│   ├── Grumpy-SpongeBob.jpg
+│   ├── Head-Out-Meme
+│   ├── Head-Out-Meme.png
+│   ├── Mocking-SpongeBob
+│   ├── Mocking-SpongeBob.jpg
+│   ├── Profile_-_SpongeBob_SquarePants
+│   ├── Profile_-_SpongeBob_SquarePants.png
+│   ├── SpongeBob_SquarePants_character.svg
+│   ├── SpongeBob_SquarePants_character.svg.png
+│   ├── Spongebob_PNG61
+│   ├── Spongebob_PNG61.png
+│   ├── Tired-SpongeBob.
+│   ├── Tired-SpongeBob.jpeg
+│   ├── a448t4s0i21d1.
+│   ├── a448t4s0i21d1.jpeg
+│   ├── beach spongebob caveman meme
+│   ├── beach spongebob caveman meme.png
+│   ├── bmj1r3fdyl1d1.
+│   ├── bmj1r3fdyl1d1.jpeg
+│   ├── c8p39vd3ws1d1.
+│   ├── c8p39vd3ws1d1.jpeg
+│   ├── ew344pq7td1d1.
+│   ├── ew344pq7td1d1.jpeg
+│   ├── fnb3s5kass1d1.
+│   ├── fnb3s5kass1d1.jpeg
+│   ├── gw14akfn6p1d1.
+│   ├── gw14akfn6p1d1.jpeg
+│   ├── h1yu4k98lv0d1.
+│   ├── h1yu4k98lv0d1.jpeg
+│   ├── hrhlcbg7t71d1
+│   ├── hrhlcbg7t71d1.jpg
+│   ├── j3o5zl1xqs1d1.
+│   ├── j3o5zl1xqs1d1.jpeg
+│   ├── nkggz3he5o1d1.
+│   ├── nkggz3he5o1d1.jpeg
+│   ├── o2u94q17g31d1.
+│   ├── o2u94q17g31d1.jpeg
+│   ├── po03bp3egl1d1.
+│   ├── po03bp3egl1d1.jpeg
+│   ├── spcy3xu0os0d1.
+│   ├── spcy3xu0os0d1.jpeg
+│   ├── spongebob caveman meme
+│   ├── spongebob caveman meme.jpg
+│   ├── spongebob mailbox
+│   ├── spongebob mailbox.png
+│   ├── spongebob mocking meme
+│   ├── spongebob mocking meme.jpg
+│   ├── spongebob-squarepants-1592120738
+│   ├── spongebob-squarepants-1592120738.jpg
+│   ├── spongebob_patrick
+│   ├── spongebob_patrick.png
+│   ├── spongebob_squarepants_characters_cast
+│   ├── spongebob_squarepants_characters_cast.png
+│   ├── spvh6kq1s71d1.
+│   ├── spvh6kq1s71d1.jpeg
+│   ├── uf9rye38ps1d1.
+│   ├── uf9rye38ps1d1.jpeg
+│   ├── yut1etnl3m0d1.
+│   ├── yut1etnl3m0d1.jpeg
+│   ├── zj67b34x5p1d1.
+│   ├── zj67b34x5p1d1.jpeg
+│   ├── zohk5nkb0m1d1.
+│   └── zohk5nkb0m1d1.jpeg
+├── test
+│   └── dataset_check.py
 ├── tree.md
 └── venv.sh
 
-63 directories, 2594 files
+95 directories, 2532 files

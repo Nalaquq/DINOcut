@@ -17,8 +17,8 @@ setup(name='DinoCut',
       description='Image Processing Pipeline for Synthetic Data Generation',
       author='Sean Gleason',
       author_email='sgleason@nalaquq.com',
-      url='https://www.python.org/sigs/distutils-sig/',
-      packages=['my_package'],  # Replace 'my_package' with the actual package name
+      url='https://github.com/Nalaquq/DINOcut',
+      packages=['DINOcut'],  # Replace 'my_package' with the actual package name
      )
 
 def run_command(command: str) -> None:
@@ -47,18 +47,18 @@ repository_url = "https://github.com/IDEA-Research/GroundingDINO.git"
 commit_hash = "57535c5a79791cb76e36fdb64975271354f10251"
 package_name = "GroundingDINO"
 
-install_requirements("requirements.txt")
-
-if not check_package_installed(package_name):
-    install_github_repo(repository_url, commit_hash)
-else:
-    print(f"{package_name} is already installed.")
-
 def main():
     weight_url = "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
     dest_path = os.path.join('sam', 'weights', 'sam_vit_h_4b8939.pth')
     download_weight_file(weight_url, dest_path)
 
 if __name__ == "__main__":
+    install_requirements("requirements.txt")
+    if not check_package_installed(package_name):
+        install_github_repo(repository_url, commit_hash)
+    else:
+        print(f"{package_name} is already installed.")
     main()
+
+
 

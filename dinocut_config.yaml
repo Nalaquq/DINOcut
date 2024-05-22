@@ -1,6 +1,8 @@
 #Make sure your directory strucutre is compatible with your operating system. 
 paths:
   home_directory: "/home/nalkuq/DINOcut" #change to your current working directory. 
+  data_directory: "/home/nalkuq/DINOcut/data" #dir for storing synthetic generation assets
+  dataset_directory: "/home/nalkuq/DINOcut/dataset" #dir where synthetic dataset will be saved
   grounding_dino_checkpoint_path: "groundingdino_swint_ogc.pth"
   grounding_dino_config_path: "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
   sam_checkpoint_path: "sam_vit_h_4b8939.pth"
