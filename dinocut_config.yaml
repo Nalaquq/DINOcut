@@ -12,7 +12,7 @@ model_configs:
 
 image_settings:
   source_image_path: "starter_dataset" # can be either a directory or a single image. Place images for DINOcut to extract here. 
-  number: 1000 #The number of synthetic images to be generated. Images will be generated according to a 80/20/20 Train/Test/Val split
+  number: 20 #The number of synthetic images to be generated. Images will be generated according to a 80/20/20 Train/Test/Val split
   image_overlap: 0.3 #The degree of overlap randomly interpolated by the generator. Set to 0 if you do not want any overlapping images.
   max_obj: 10 #The maxinum number of objects to be placed in the scene by the generator.
   min_size: 400 # 

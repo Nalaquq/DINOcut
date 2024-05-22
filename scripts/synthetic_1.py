@@ -22,12 +22,11 @@ import random
 
 
 f = Figlet(font='slant')
-print(f.renderText('Cut Paste Learn'))
+print(Fore.GREEN+f.renderText('Cut Paste Learn'))
 
 # Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
 warnings.filterwarnings("ignore")
 init()
-warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser(
     description="Generates Synthetic Datasets for Object Detection."
@@ -93,7 +92,7 @@ parser.add_argument(
     "-label_format",
     type=str,
     help="The annotation style for synthetic data generation. Optoins include voc, coc, and yolo (all lowercase strings). Default is set to yolo.",
-    default="coco",
+    default="yolo",
 )
 
 args = parser.parse_args()
@@ -108,8 +107,7 @@ else:
 if args.config:
     yaml_path = args.config
 else:
-    yaml_path = "config.yaml"
-
+    yaml_path = "synthetic_config.yaml"
 
 def obj_list():
     """
@@ -314,7 +312,6 @@ def load_transformations_from_yaml(yaml_path: str) -> list:
     print(Fore.BLUE+ "Background and Object Transformations loaded successfully.")
     return transformations
 
-
 transformation_objects = load_transformations_from_yaml(yaml_path)
 transforms_bg_obj = transformation_objects["transforms_bg_obj"]
 transforms_obj = transformation_objects["transforms_obj"]
@@ -485,7 +482,6 @@ def add_obj(
         mask_added = mask[h - h_part : h, 0:w_part]
 
     return img_comp, mask_comp, mask_added
-
 
 
 def create_bg_with_noise(
@@ -886,157 +882,6 @@ def mkdir() -> None:
             )
             print(Fore.GREEN+"\n Beginning Data Generation\n")
             pass
-'''
-def mkdir() -> None:
-    """
-    Creates directories for dataset storage and manages file system navigation.
-
-    This function performs a series of operations to ensure that the necessary directories for storing
-    a dataset are present. It attempts to create a 'dataset' directory, and if it already exists, it changes
-    the working directory to it. Subdirectories for 'train', 'test', and 'val' datasets, along with their
-    respective 'images' and 'labels' subdirectories, are also created. The function handles file system
-    navigation and provides user feedback about the operations performed.
-
-    During the process, it prints the home directory, the main data path (assumed to be specified by
-    global `PATH_MAIN`), and the dataset directory. If specified by command-line arguments (using `args.erase`),
-    it can optionally delete existing datasets to allow for a clean regeneration.
-
-    Raises:
-        OSError: If directory creation or navigation fails, or if file deletion encounters issues.
-        AttributeError: If required globals like `PATH_MAIN` or `args` are not set.
-
-    Notes:
-        - The function assumes that the global variable `dataset` should be defined outside or it will be set
-          dynamically in case of exceptions during directory operations.
-        - It relies on the argparse library to handle command-line arguments, specifically checking `args.erase`
-          to determine if existing data files should be deleted.
-        - The function does not return any values but prints details about the operations and their outcomes
-          to the console.
-    """
-    try:
-        print(Fore.BLUE+"\n\n Checking Project Paths:")
-        home = os.path.abspath(os.getcwd())
-        try:
-            os.mkdir(dataset)
-            os.chdir(dataset)
-        except:
-            os.chdir(dataset)
-        dir_list = ["train", "test", "val"]
-        sub_dir_list = ["images", "labels"]
-        for x in dir_list:
-            os.mkdir(x)
-        print(Fore.BLUE+"\n\t Home Directory: '{}' ".format(home))
-        print(Fore.BLUE+"\n\t Data For Generation: '{}'".format(PATH_MAIN))
-    except:
-        dataset = os.path.join(home, "dataset")
-        print(Fore.BLUE+"\n\t Home Directory:'{}' ".format(home))
-        print(Fore.BLUE+"\n\t Data For Generation: '{}' ".format(PATH_MAIN))
-        print(Fore.BLUE+"\n\t Generated Datasets Stored in: '{}' ".format(dataset))
-        # insert if statement for argparse libary that runs clean remove existing dataset -del if set to true. Default will be false..
-        total_number = []
-        if args.erase == True:
-            print(Fore.RED+"\n\tThe Erase function has been enabled \n")
-            print(Fore.RED+"\n Removing Old Datasets from: {}".format(dataset))
-            for root, dirs, files in os.walk(dataset):
-                for name in tqdm(files):
-                    total_number.append(files)
-                    if name.endswith(".jpg"):
-                        selected_files = os.path.join(root, name)
-                        os.remove(selected_files)
-                    if name.endswith(".txt"):
-                        selected_files = os.path.join(root, name)
-                        os.remove(selected_files)
-            print(Fore.RED+"\n{} files were deleted.".format(len(total_number)))
-        else:
-            for root, dirs, files in os.walk(dataset):
-                for name in files:
-                    if name.endswith(".jpg"):
-                        selected_files = os.path.join(root, name)
-                    if name.endswith(".txt"):
-                        selected_files = os.path.join(root, name)
-            print(Fore.RED+"\n\t {} files were deleted.".format(len(total_number)))
-            print(
-                Fore.BLUE+"\n\t There are {} labels and images in this dataset.".format(
-                    len(selected_files)
-                )
-            )
-            print(Fore.GREEN+"\n Beginning Data Generation\n")
-            pass
-
-def mkdir() -> None:
-    """
-    Creates directories for dataset storage and manages file system navigation.
-
-    This function ensures that the necessary directories for storing a dataset are present. It attempts to create a 
-    'dataset' directory, and if it already exists, it changes the working directory to it. Subdirectories for 'train', 
-    'test', and 'val' datasets, along with their respective 'images' and 'labels' subdirectories, are also created. 
-    The function handles file system navigation and provides user feedback about the operations performed.
-
-    During the process, it prints the home directory, the main data path (assumed to be specified by global `PATH_MAIN`), 
-    and the dataset directory. If specified by command-line arguments (using `args.erase`), it can optionally delete 
-    existing datasets to allow for a clean regeneration.
-
-    Raises:
-        OSError: If directory creation or navigation fails, or if file deletion encounters issues.
-        AttributeError: If required globals like `PATH_MAIN` or `args` are not set.
-
-    Notes:
-        - The function assumes that the global variable `dataset` should be defined outside or it will be set
-          dynamically in case of exceptions during directory operations.
-        - It relies on the argparse library to handle command-line arguments, specifically checking `args.erase`
-          to determine if existing data files should be deleted.
-        - The function does not return any values but prints details about the operations and their outcomes
-          to the console.
-    """
-    try:
-        print("\n\nChecking Project Paths:")
-        home = os.path.abspath(os.getcwd())
-        dataset = os.path.join(home, "dataset")
-        
-        # Ensure the dataset directory exists
-        if not os.path.exists(dataset):
-            os.mkdir(dataset)
-        os.chdir(dataset)
-
-        dir_list = ["train", "test", "val"]
-        sub_dir_list = ["images", "labels"]
-
-        for main_dir in dir_list:
-            main_dir_path = os.path.join(dataset, main_dir)
-            if not os.path.exists(main_dir_path):
-                os.mkdir(main_dir_path)
-            for sub_dir in sub_dir_list:
-                sub_dir_path = os.path.join(main_dir_path, sub_dir)
-                if not os.path.exists(sub_dir_path):
-                    os.mkdir(sub_dir_path)
-        
-        print("\n\tHome Directory: '{}'".format(home))
-        print("\n\tData For Generation: '{}'".format(PATH_MAIN))
-
-        # Handle erasure of existing datasets if specified
-        if args.erase:
-            print("\n\tThe Erase function has been enabled")
-            print("\nRemoving Old Datasets from: {}".format(dataset))
-            total_number = 0
-            for root, dirs, files in os.walk(dataset):
-                for name in tqdm(files):
-                    file_path = os.path.join(root, name)
-                    if name.endswith(".jpg") or name.endswith(".txt"):
-                        os.remove(file_path)
-                        total_number += 1
-            print("\n{} files were deleted.".format(total_number))
-        else:
-            total_files = 0
-            for root, dirs, files in os.walk(dataset):
-                total_files += len([name for name in files if name.endswith(".jpg") or name.endswith(".txt")])
-            print("\n\tThere are {} labels and images in this dataset.".format(total_files))
-            print("\nBeginning Data Generation\n")
-
-    except OSError as e:
-        print(f"OS error: {e}")
-    except AttributeError as e:
-        print(f"Attribute error: {e}")
-'''
 
 def test_train_val_split() -> None:
     """
@@ -1118,7 +963,6 @@ def generate_directory_structure(root_dir: str) -> Dict[str, Any]:
 
     return directory_structure
 
-
 def get_path_from_structure(structure: Dict[str, Any], *path: str) -> Optional[str]:
     """
     Retrieves the relative path from the directory structure.
@@ -1137,43 +981,6 @@ def get_path_from_structure(structure: Dict[str, Any], *path: str) -> Optional[s
         else:
             return None
     return os.path.join(*path) if isinstance(current_level, dict) else None
-
-
-def convert_yolo_to_voc(yolo_label_path: str, voc_label_path: str, image_width: int, image_height: int):
-    """
-    Converts a YOLO label to VOC format.
-    
-    Args:
-        yolo_label_path (str): Path to the YOLO label file.
-        voc_label_path (str): Path to save the VOC label file.
-        image_width (int): Width of the image.
-        image_height (int): Height of the image.
-    """
-    annotation = ET.Element("annotation")
-    
-    with open(yolo_label_path, 'r') as file:
-        for line in file:
-            class_id, x_center, y_center, width, height = map(float, line.strip().split())
-            
-            obj = ET.SubElement(annotation, "object")
-            ET.SubElement(obj, "name").text = str(int(class_id))  # Replace with class name if available
-            ET.SubElement(obj, "pose").text = "Unspecified"
-            ET.SubElement(obj, "truncated").text = "0"
-            ET.SubElement(obj, "difficult").text = "0"
-            
-            bbox = ET.SubElement(obj, "bndbox")
-            x_min = int((x_center - width / 2) * image_width)
-            y_min = int((y_center - height / 2) * image_height)
-            x_max = int((x_center + width / 2) * image_width)
-            y_max = int((y_center + height / 2) * image_height)
-            
-            ET.SubElement(bbox, "xmin").text = str(x_min)
-            ET.SubElement(bbox, "ymin").text = str(y_min)
-            ET.SubElement(bbox, "xmax").text = str(x_max)
-            ET.SubElement(bbox, "ymax").text = str(y_max)
-    
-    tree = ET.ElementTree(annotation)
-    tree.write(voc_label_path)
 
 def convert_yolo_to_coco(yolo_label_path: str, coco_annotations: List[Dict[str, Any]], image_id: int, category_id: int, image_width: int, image_height: int):
     """
@@ -1309,204 +1116,6 @@ def generate() -> None:
     generate_dataset(ttv[0], folder="dataset", split="test")
     generate_dataset(ttv[2], folder="dataset", split="val")
     generate_dataset(ttv[1], folder="dataset", split="train")
-
-
-def get_classes(data: Dict[int, Dict[str, int]]) -> List[str]:
-    """
-    Extracts the values of the 'folder' key from each sub-dictionary in the input dictionary.
-
-    Args:
-        data (Dict[int, Dict[str, int]]): A dictionary where each key maps to a dictionary
-                                          containing 'folder', 'longest_min', and 'longest_max' keys.
-
-    Returns:
-        List[str]: A list of values from the 'folder' key in each sub-dictionary.
-    """
-    return [sub_dict["folder"] for sub_dict in data.values()]
-
-
-def generate_directory_structure(root_dir: str) -> Dict[str, Any]:
-    """
-    Generates a nested dictionary representing the directory structure.
-
-    Args:
-        root_dir (str): The root directory from which to generate the structure.
-
-    Returns:
-        Dict[str, Any]: A nested dictionary representing the directory structure.
-    """
-    directory_structure = {}
-
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        # Split the path into components
-        parts = dirpath.split(os.sep)
-        # Navigate the nested dictionary to the current directory
-        current_level = directory_structure
-        for part in parts:
-            if part not in current_level:
-                current_level[part] = {}
-            current_level = current_level[part]
-
-    return directory_structure
-
-
-def get_path_from_structure(structure: Dict[str, Any], *path: str) -> Optional[str]:
-    """
-    Retrieves the relative path from the directory structure.
-
-    Args:
-        structure (Dict[str, Any]): The nested dictionary representing the directory structure.
-        path (str): The sequence of keys representing the desired path.
-
-    Returns:
-        Optional[str]: The relative path as a string if found, otherwise None.
-    """
-    current_level = structure
-    for part in path:
-        if part in current_level:
-            current_level = current_level[part]
-        else:
-            return None
-    return os.path.join(*path) if isinstance(current_level, dict) else None
-
-
-def convert_yolo_to_voc(yolo_label_path: str, voc_label_path: str, image_width: int, image_height: int):
-    """
-    Converts a YOLO label to VOC format.
-    
-    Args:
-        yolo_label_path (str): Path to the YOLO label file.
-        voc_label_path (str): Path to save the VOC label file.
-        image_width (int): Width of the image.
-        image_height (int): Height of the image.
-    """
-    annotation = ET.Element("annotation")
-    
-    with open(yolo_label_path, 'r') as file:
-        for line in file:
-            class_id, x_center, y_center, width, height = map(float, line.strip().split())
-            
-            obj = ET.SubElement(annotation, "object")
-            ET.SubElement(obj, "name").text = str(int(class_id))  # Replace with class name if available
-            ET.SubElement(obj, "pose").text = "Unspecified"
-            ET.SubElement(obj, "truncated").text = "0"
-            ET.SubElement(obj, "difficult").text = "0"
-            
-            bbox = ET.SubElement(obj, "bndbox")
-            x_min = int((x_center - width / 2) * image_width)
-            y_min = int((y_center - height / 2) * image_height)
-            x_max = int((x_center + width / 2) * image_width)
-            y_max = int((y_center + height / 2) * image_height)
-            
-            ET.SubElement(bbox, "xmin").text = str(x_min)
-            ET.SubElement(bbox, "ymin").text = str(y_min)
-            ET.SubElement(bbox, "xmax").text = str(x_max)
-            ET.SubElement(bbox, "ymax").text = str(y_max)
-    
-    tree = ET.ElementTree(annotation)
-    tree.write(voc_label_path)
-
-def convert_yolo_to_coco(yolo_label_path: str, coco_annotations: List[Dict[str, Any]], image_id: int, category_id: int, image_width: int, image_height: int):
-    """
-    Converts a YOLO label to COCO format and appends it to the provided COCO annotations list.
-    
-    Args:
-        yolo_label_path (str): Path to the YOLO label file.
-        coco_annotations (List[Dict[str, Any]]): List to append the COCO annotations to.
-        image_id (int): ID of the image.
-        category_id (int): ID of the category.
-        image_width (int): Width of the image.
-        image_height (int): Height of the image.
-    """
-    with open(yolo_label_path, 'r') as file:
-        for line in file:
-            class_id, x_center, y_center, width, height = map(float, line.strip().split())
-            x_center *= image_width
-            y_center *= image_height
-            width *= image_width
-            height *= image_height
-            x_min = x_center - width / 2
-            y_min = y_center - height / 2
-            
-            annotation = {
-                "image_id": image_id,
-                "category_id": category_id,
-                "bbox": [x_min, y_min, width, height],
-                "area": width * height,
-                "iscrowd": 0
-            }
-            coco_annotations.append(annotation)
-
-def convert_labels(root_dir: str, conversion_type: str):
-    """
-    Converts labels from YOLO format to VOC or COCO format and deletes the old YOLO labels.
-    
-    Args:
-        root_dir (str): The root directory containing 'train', 'test', and 'val' subdirectories.
-        conversion_type (str): The target format for conversion ('voc' or 'coco').
-    """
-    subsets = ['train', 'test', 'val']
-    image_ext = '.jpg'  # Assuming images are in .jpg format, change if necessary
-    
-    for subset in subsets:
-        labels_dir = os.path.join(root_dir, subset, 'labels')
-        images_dir = os.path.join(root_dir, subset, 'images')
-        new_labels_dir = os.path.join(root_dir, subset, 'labels')
-        
-        # Create the new labels directory if it doesn't exist
-        os.makedirs(new_labels_dir, exist_ok=True)
-        
-        if conversion_type == 'coco':
-            coco_annotations = []
-            coco_images = []
-            coco_categories = [{"id": 1, "name": "class_name"}]  # Replace with actual category names and IDs
-            
-        for label_file in os.listdir(labels_dir):
-            if label_file.endswith('.txt'):  # Assuming YOLO labels are in .txt format
-                yolo_label_path = os.path.join(labels_dir, label_file)
-                image_name = label_file.replace('.txt', image_ext)
-                image_path = os.path.join(images_dir, image_name)
-                
-                # Get image dimensions
-                if os.path.exists(image_path):
-                    with open(image_path, 'rb') as img_file:
-                        from PIL import Image
-                        with Image.open(img_file) as img:
-                            image_width, image_height = img.size
-                else:
-                    continue
-                
-                new_label_path = os.path.join(new_labels_dir, label_file.replace('.txt', '.xml' if conversion_type == 'voc' else '.json'))
-                
-                if conversion_type == 'voc':
-                    convert_yolo_to_voc(yolo_label_path, new_label_path, image_width, image_height)
-                elif conversion_type == 'coco':
-                    image_id = len(coco_images) + 1
-                    category_id = 1  # Replace with actual category ID lookup if necessary
-                    coco_images.append({
-                        "id": image_id,
-                        "file_name": image_name,
-                        "width": image_width,
-                        "height": image_height
-                    })
-                    convert_yolo_to_coco(yolo_label_path, coco_annotations, image_id, category_id, image_width, image_height)
-                
-                # Delete the old YOLO label
-                os.remove(yolo_label_path)
-        
-        if conversion_type == 'coco':
-            coco_output = {
-                "images": coco_images,
-                "annotations": coco_annotations,
-                "categories": coco_categories
-            }
-            coco_output_path = os.path.join(new_labels_dir, 'annotations.json')
-            with open(coco_output_path, 'w') as json_file:
-                json.dump(coco_output, json_file, indent=4)
-        
-        # Optionally, remove the old labels directory if it's empty
-        if not os.listdir(labels_dir):
-            os.rmdir(labels_dir)
 
 def get_classes(data: Dict[int, Dict[str, int]]) -> List[str]:
     """
