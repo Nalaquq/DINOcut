@@ -758,5 +758,5 @@ if __name__ == "__main__":
     #dinocut_generate()
     #os.system("python3 scripts/selector.py --directory /home/nalkuq/cmm/starter_dataset --target-directory /home/nalkuq/cmm/data")
     os.system(
-        f'python3 scripts/synthetic_1.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
+        f'python3 scripts/synthetic.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
     )
