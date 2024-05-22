@@ -19,6 +19,8 @@ import warnings
 import emoji
 import shutil
 from pyfiglet import Figlet
+from PIL import Image
+
 
 f = Figlet(font="slant")
 print(f.renderText("DINOcut"))
@@ -106,6 +108,48 @@ else:
         + f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more\n"
     )
 
+
+def convert_images_in_directory(directory: str) -> None:
+    """
+    Converts all images in the specified directory to .jpg format.
+
+    This function scans the given directory for files with supported image formats,
+    converts them to .jpg format, and saves them in the same directory.
+
+    Supported image formats: .png, .svg, .jpg, .jpeg, .bmp, .gif, .tiff
+
+    Args:
+        directory (str): The path to the directory containing the images to be converted.
+
+    Raises:
+        OSError: If an error occurs while opening or saving an image file.
+    """
+    
+    # Define supported image formats
+    supported_formats: Tuple[str, ...] = ('.png', '.svg', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff')
+
+    # Loop through all files in the directory
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        
+        # Check if the file is an image based on its extension
+        if filename.lower().endswith(supported_formats):
+            try:
+                # Open the image file
+                with Image.open(file_path) as img:
+                    # Convert the image to RGB mode if it's not already in that mode
+                    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+                        img = img.convert("RGB")
+                    
+                    # Define the output path
+                    base, _ = os.path.splitext(filename)
+                    output_path = os.path.join(directory, base + ".jpg")
+                    
+                    # Save the image as a .jpg file
+                    img.save(output_path, "JPEG")
+                    print(f"Image saved as {output_path}")
+            except Exception as e:
+                print(f"Failed to convert {file_path}: {e}")
 
 def cuda_enabled() -> str:
     """
@@ -628,13 +672,13 @@ def dinocut_generate():
         )
         print_emoji_line(":T-Rex:", 7)
         try:
-            dino_display_image(image, detections, CLASSES)
+            #dino_display_image(image, detections, CLASSES)
             detections.mask = segment(
                 sam_predictor=sam_predictor,
                 image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
                 xyxy=detections.xyxy,
             )
-            show_sam_detections(image, detections, CLASSES)
+            #show_sam_detections(image, detections, CLASSES)
             save_inverted_masks(detections.mask)
             create_training_image(path)
             # need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder.
@@ -673,13 +717,13 @@ def dinocut_generate():
             )
             print_emoji_line(":T-Rex:", 7)
             try:
-                dino_display_image(image, detections, CLASSES)
+                #dino_display_image(image, detections, CLASSES)
                 detections.mask = segment(
                     sam_predictor=sam_predictor,
                     image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
                     xyxy=detections.xyxy,
                 )
-                show_sam_detections(image, detections, CLASSES)
+                #show_sam_detections(image, detections, CLASSES)
                 mask = save_inverted_masks(detections.mask)
                 create_training_image(path)
                 directory = f"{path[:-4]}"
@@ -710,10 +754,9 @@ def dinocut_generate():
 
 
 if __name__ == "__main__":
-    dinocut_generate()
+    #convert_images_in_directory(f"{config['image_settings']['source_image_path']}")
+    #dinocut_generate()
+    #os.system("python3 scripts/selector.py --directory /home/nalkuq/cmm/starter_dataset --target-directory /home/nalkuq/cmm/data")
     os.system(
-        "python3 scripts/selector.py --directory /home/nalkuq/cmm/starter_dataset --target-directory /home/nalkuq/cmm/data"
-    )
-    os.system(
-        f'python3 scripts/synthetic.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
+        f'python3 scripts/synthetic_1.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
     )

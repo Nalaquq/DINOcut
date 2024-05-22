@@ -91,7 +91,7 @@ parser.add_argument(
     "-label_format",
     type=str,
     help="The annotation style for synthetic data generation. Optoins include voc, coc, and yolo (all lowercase strings). Default is set to yolo.",
-    default="coco",
+    default="yolo",
 )
 args = parser.parse_args()
 
@@ -106,8 +106,6 @@ if args.config:
     yaml_path = args.config
 else:
     yaml_path = "dinocut_config.yaml"
-
-
 
 def obj_list():
     """
@@ -395,7 +393,6 @@ def resize_transform_obj(
 
     return img_t, mask_t
 
-
 def add_obj(
     img_comp: np.ndarray,
     mask_comp: np.ndarray,
@@ -406,37 +403,21 @@ def add_obj(
     idx: int,
 ) -> tuple:
     """
-        Incorporates an object and its mask into an existing image composition at specified coordinates.
+    Incorporates an object and its mask into an existing image composition at specified coordinates.
 
-        Parameters:
-            img_comp (np.ndarray): The existing composition of images in which the new image will be integrated.
-            mask_comp (np.ndarray): The existing composition of masks corresponding to img_comp.
-            img (np.ndarray): The image of the object to be added.
-            mask (np.ndarray): The binary mask of the object to be added.
-            x (int): The x-coordinate where the center of the object image is to be placed.
-            y (int): The y-coordinate where the center of the object image is to be placed.
-            idx (int): The index used to identify the object in the mask composition.
+    Parameters:
+        img_comp (np.ndarray): The existing composition of images in which the new image will be integrated.
+        mask_comp (np.ndarray): The existing composition of masks corresponding to img_comp.
+        img (np.ndarray): The image of the object to be added.
+        mask (np.ndarray): The binary mask of the object to be added.
+        x (int): The x-coordinate where the center of the object image is to be placed.
+        y (int): The y-coordinate where the center of the object image is to be placed.
+        idx (int): The index used to identify the object in the mask composition.
 
-        Returns:
-            tuple: A tuple containing the updated image composition, mask composition, and the segment of the added mask.
-
-        Description:
-            The function adjusts the coordinates to ensure the object image is centered at the specified (x, y) location.
-            It then calculates the intersection of the object image with the bounds of the image composition, applies the object
-            image and mask to the corresponding regions, and updates the mask composition using the provided idx. The function
-            handles different cases based on the boundaries and whether the specified coordinates are inside the composition.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Returns:
+        tuple: A tuple containing the updated image composition, mask composition, and the segment of the added mask.
     """
     h_comp, w_comp = img_comp.shape[0], img_comp.shape[1]
-
     h, w = img.shape[0], img.shape[1]
 
     x = x - int(w / 2)
@@ -445,13 +426,16 @@ def add_obj(
     mask_b = mask == 1
     mask_rgb_b = np.stack([mask_b, mask_b, mask_b], axis=2)
 
+    # Ensure object is within bounds
+    x_end, y_end = min(x + w, w_comp), min(y + h, h_comp)
+    x_start, y_start = max(x, 0), max(y, 0)
+    if x_end <= x_start or y_end <= y_start:
+        print(f"Object with idx {idx} is out of bounds and will not be added.")
+        return img_comp, mask_comp, np.zeros_like(mask)  # Return empty mask
+
     if x >= 0 and y >= 0:
-        h_part = h - max(
-            0, y + h - h_comp
-        )  # h_part - part of the image which gets into the frame of img_comp along y-axis
-        w_part = w - max(
-            0, x + w - w_comp
-        )  # w_part - part of the image which gets into the frame of img_comp along x-axis
+        h_part = h - max(0, y + h - h_comp)
+        w_part = w - max(0, x + w - w_comp)
 
         img_comp[y : y + h_part, x : x + w_part, :] = (
             img_comp[y : y + h_part, x : x + w_part, :]
@@ -512,8 +496,14 @@ def add_obj(
         )
         mask_added = mask[h - h_part : h, 0:w_part]
 
-    return img_comp, mask_comp, mask_added
+    #print statements for debugging
+    #print(f"Added object with idx {idx} at position ({x}, {y})")
+    #print(f"mask_comp unique IDs after addition: {np.unique(mask_comp)}")
+    #print(f"mask_comp shape: {mask_comp.shape}")
+    #print(f"mask_added shape: {mask_added.shape}")
+    #print(f"mask_added unique values: {np.unique(mask_added)}")
 
+    return img_comp, mask_comp, mask_added
 
 def create_bg_with_noise(
     files_bg_imgs: List[str],
@@ -589,39 +579,32 @@ def create_bg_with_noise(
 
     return img_comp_bg
 
-
 def check_areas(
     mask_comp: np.ndarray, obj_areas: list, overlap_degree: float = 0.3
 ) -> bool:
     """
-        Checks if the area overlap between objects in an image composition exceeds a specified degree.
+    Checks if the area overlap between objects in an image composition exceeds a specified degree.
 
-        Parameters:
-            mask_comp (np.ndarray): A 2D array representing the mask composition where different values correspond to different objects.
-            obj_areas (list): A list containing the area (in pixels) of each object when it was first placed in the composition.
-            overlap_degree (float, optional): The maximum allowable proportion of overlap relative to the original object area. Defaults to 0.3.
+    Parameters:
+        mask_comp (np.ndarray): A 2D array representing the mask composition where different values correspond to different objects.
+        obj_areas (list): A list containing the area (in pixels) of each object when it was first placed in the composition.
+        overlap_degree (float, optional): The maximum allowable proportion of overlap relative to the original object area. Defaults to 0.3.
 
-        Returns:
-            bool: True if the area overlaps are within the acceptable limits, False otherwise.
+    Returns:
+        bool: True if the area overlaps are within the acceptable limits, False otherwise.
 
-        Description:
-            The function compares the areas of each object in the composition mask to their original areas when first placed.
-            If any object's current area in the composition is less than its original area minus the allowed overlap degree,
-            it suggests significant overlap with other objects and the function returns False. This is crucial for applications
-            where object independence in detection or analysis is necessary.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Description:
+        The function compares the areas of each object in the composition mask to their original areas when first placed.
+        If any object's current area in the composition is less than its original area minus the allowed overlap degree,
+        it suggests significant overlap with other objects and the function returns False. This is crucial for applications
+        where object independence in detection or analysis is necessary.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     obj_ids = np.unique(mask_comp).astype(np.uint8)[
-        1:-1
+        1:-1 #-1
     ]  # Skip the background (typically 0) and exclude the last ID if unused
+    #print(obj_ids) debugging
     masks = mask_comp == obj_ids[:, None, None]
 
     ok = True  # Assume no excessive overlap by default
@@ -671,7 +654,7 @@ def create_composition(
     i = 1
 
     for _ in range(1, num_objs):
-        obj_idx = np.random.randint(len(obj_dict))  # + 1
+        obj_idx = np.random.randint(len(obj_dict))
 
         for _ in range(max_attempts_per_obj):
             imgs_number = len(obj_dict[obj_idx]["images"])
@@ -691,9 +674,10 @@ def create_composition(
                 img_comp, mask_comp, mask_added = add_obj(
                     img_comp, mask_comp, img, mask, x, y, i
                 )
-                obj_areas.append(np.count_nonzero(mask_added))
-                labels_comp.append(i)  # Ensure non-zero label and incrementing correctly
-                i += 1
+                if np.count_nonzero(mask_added) > 0:
+                    obj_areas.append(np.count_nonzero(mask_added))
+                    labels_comp.append(i - 1)  # Zero-indexed for YOLO
+                    i += 1
                 break
             else:
                 img_comp_prev, mask_comp_prev = img_comp.copy(), mask_comp.copy()
@@ -702,9 +686,10 @@ def create_composition(
                 )
                 ok = check_areas(mask_comp, obj_areas, overlap_degree)
                 if ok:
-                    obj_areas.append(np.count_nonzero(mask_added))
-                    labels_comp.append(i)  # Ensure non-zero label and incrementing correctly
-                    i += 1
+                    if np.count_nonzero(mask_added) > 0:
+                        obj_areas.append(np.count_nonzero(mask_added))
+                        labels_comp.append(i - 1)  # Zero-indexed for YOLO
+                        i += 1
                     break
                 else:
                     img_comp, mask_comp = img_comp_prev.copy(), mask_comp_prev.copy()
@@ -712,151 +697,37 @@ def create_composition(
     # Additional debugging logs
     unique_ids = np.unique(mask_comp)
     obj_ids = unique_ids[unique_ids != 0]  # Ensure background ID (0) is excluded
-
-    print(f"Number of objects placed: {len(labels_comp)}")
-    print(f"Unique object IDs in mask: {unique_ids}")
-    print(f"Labels composition: {labels_comp}")
-    print(f"Length of labels_comp: {len(labels_comp)}")
-    print(f"Length of masks: {len(obj_ids)}")
-    print(f"obj_ids: {obj_ids}")
-    print(f"mask_comp shape: {mask_comp.shape}")
-    print(f"labels_comp: {labels_comp}")
+    #debugging statments
+    #print(f"Number of objects placed: {len(labels_comp)}")
+    #print(f"Unique object IDs in mask: {unique_ids}")
+    #print(f"Labels composition: {labels_comp}")
+    #print(f"Length of labels_comp: {len(labels_comp)}")
+    #print(f"Length of masks: {len(obj_ids)}")
+    #print(f"obj_ids: {obj_ids}")
+    #print(f"mask_comp shape: {mask_comp.shape}")
+    #print(f"labels_comp: {labels_comp}")
 
     # Check length match before returning
     if len(labels_comp) != len(obj_ids):
         print(f"Mismatch: labels_comp ({len(labels_comp)}) vs. obj_ids ({len(obj_ids)})")
-        print(f"Length of labels_comp: {len(labels_comp)}")
-        print(f"Length of masks: {len(obj_ids)}")
-        print(f"obj_ids: {obj_ids}")
-        print(f"mask_comp shape: {mask_comp.shape}")
-        print(f"labels_comp: {labels_comp}")
         raise ValueError("Error: Length of labels_comp does not match length of obj_ids")
 
     return img_comp, mask_comp, labels_comp, obj_areas
 
 
-'''
-def create_composition(
-    img_comp_bg: np.ndarray,
-    max_objs: int,
-    overlap_degree: float,
-    max_attempts_per_obj: int,
-) -> tuple:
-    """
-        Creates a composite image by randomly placing objects onto a background image with constraints on overlap and number of attempts.
-
-        Parameters:
-            img_comp_bg (np.ndarray): The background image on which objects will be added.
-            max_objs (int): The maximum number of objects to attempt to add to the background.
-            overlap_degree (float): A threshold for the acceptable degree of overlap between objects.
-            max_attempts_per_obj (int): The maximum number of attempts to place each object before moving to the next.
-
-        Returns:
-            tuple: A tuple containing the composite image (np.ndarray), the composite mask (np.ndarray),
-                   a list of labels corresponding to the objects added (list), and a list of areas for each object mask (list).
-
-        Description:
-            The function iterates over a randomly determined number of objects (not exceeding max_objs) to add to the background.
-            Each object is selected from a pre-defined dictionary `obj_dict` which is expected to be generated by the `obj_list` function.
-            The objects are resized and transformed based on predefined criteria and are attempted to be added to the image composition,
-            checking for overlap constraints. If the placement of an object violates the overlap degree, the attempt is aborted and retried.
-            The process respects the maximum number of placement attempts for each object.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
-    """
-    obj_dict = obj_list()
-    img_comp = img_comp_bg.copy()
-    h, w = img_comp.shape[0], img_comp.shape[1]
-    mask_comp = np.zeros((h, w), dtype=np.uint8)
-
-    obj_areas = []
-    labels_comp = []
-    num_objs = np.random.randint(max_objs) + 2
-
-    i = 1
-
-    for _ in range(1, num_objs):
-        obj_idx = np.random.randint(len(obj_dict))  # + 1
-
-        for _ in range(max_attempts_per_obj):
-            imgs_number = len(obj_dict[obj_idx]["images"])
-            idx = np.random.randint(imgs_number)
-            img_path = obj_dict[obj_idx]["images"][idx]
-            mask_path = obj_dict[obj_idx]["masks"][idx]
-            img, mask = get_img_and_mask(img_path, mask_path)
-
-            x, y = np.random.randint(w), np.random.randint(h)
-            longest_min = obj_dict[obj_idx]["longest_min"]
-            longest_max = obj_dict[obj_idx]["longest_max"]
-            img, mask = resize_transform_obj(
-                img, mask, longest_min, longest_max, transforms=transforms_obj
-            )
-
-            if i == 1:
-                img_comp, mask_comp, mask_added = add_obj(
-                    img_comp, mask_comp, img, mask, x, y, i
-                )
-                obj_areas.append(np.count_nonzero(mask_added))
-                labels_comp.append(obj_idx)
-                i += 1
-                break
-            else:
-                img_comp_prev, mask_comp_prev = img_comp.copy(), mask_comp.copy()
-                img_comp, mask_comp, mask_added = add_obj(
-                    img_comp, mask_comp, img, mask, x, y, i
-                )
-                ok = check_areas(mask_comp, obj_areas, overlap_degree)
-                if ok:
-                    obj_areas.append(np.count_nonzero(mask_added))
-                    labels_comp.append(obj_idx)
-                    i += 1
-                    break
-                else:
-                    img_comp, mask_comp = img_comp_prev.copy(), mask_comp_prev.copy()
-
-    return img_comp, mask_comp, labels_comp, obj_areas
-
-'''
-'''
-def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> list:
-    """
-        Generate YOLO format annotations for objects identified in a mask with associated labels.
-
-        Parameters:
-            mask_comp (np.ndarray): A 2D array where each pixel's integer value represents the object ID.
-            labels_comp (np.ndarray): An array containing the labels corresponding to each object ID in mask_comp.
-
-        Returns:
-            list: A list of lists, where each inner list contains normalized bounding box information
-                  and the label for an object in YOLO format ([class_id, x_center, y_center, width, height]).
-
-        Notes:
-            The function expects `mask_comp` to be a grayscale image where different values correspond to
-            different objects. `labels_comp` is expected to be an array where each entry corresponds to a label
-            for the objects identified in `mask_comp`. The function calculates the bounding box coordinates for
-            each object, normalizes these coordinates relative to the dimensions of `mask_comp`, and formats
-            them according to the YOLO annotation standard.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
-    """
+def create_yolo_annotations(mask_comp, labels_comp):
     comp_w, comp_h = mask_comp.shape[1], mask_comp.shape[0]
-
+    
     obj_ids = np.unique(mask_comp).astype(np.uint8)[1:]
     masks = mask_comp == obj_ids[:, None, None]
+
+    # Adjust labels_comp length to match masks length
+    if len(masks) != len(labels_comp):
+        if len(masks) < len(labels_comp):
+            labels_comp = labels_comp[:len(masks)]
+        else:
+            print(f"Warning: Not enough labels for all objects. Expecting {len(masks)}, but got {len(labels_comp)}.")
+            labels_comp.extend([-1] * (len(masks) - len(labels_comp)))  # Adding placeholder labels
 
     annotations_yolo = []
     for i in range(len(labels_comp)):
@@ -871,78 +742,14 @@ def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> l
         w = xmax - xmin
         h = ymax - ymin
 
-        annotations_yolo.append(
-            [
-                labels_comp[i],
-                round(xc / comp_w, 5),
-                round(yc / comp_h, 5),
-                round(w / comp_w, 5),
-                round(h / comp_h, 5),
-            ]
-        )
+        annotations_yolo.append([labels_comp[i],
+                                 round(xc/comp_w, 5),
+                                 round(yc/comp_h, 5),
+                                 round(w/comp_w, 5),
+                                 round(h/comp_h, 5)])
 
     return annotations_yolo
-'''
-def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> list:
-    """
-    Generate YOLO format annotations for objects identified in a mask with associated labels.
 
-    Parameters:
-        mask_comp (np.ndarray): A 2D array where each pixel's integer value represents the object ID.
-        labels_comp (np.ndarray): An array containing the labels corresponding to each object ID in mask_comp.
-
-    Returns:
-        list: A list of lists, where each inner list contains normalized bounding box information
-              and the label for an object in YOLO format ([class_id, x_center, y_center, width, height]).
-    """
-    comp_w, comp_h = mask_comp.shape[1], mask_comp.shape[0]
-
-    obj_ids = np.unique(mask_comp).astype(np.uint8)[1:]
-    masks = mask_comp == obj_ids[:, None, None]
-
-    # Debug prints to check sizes and contents
-    print(f"Length of labels_comp: {len(labels_comp)}")
-    print(f"Length of masks: {len(masks)}")
-    print(f"obj_ids: {obj_ids}")
-    print(f"mask_comp shape: {mask_comp.shape}")
-    print(f"labels_comp: {labels_comp}")
-
-    if len(labels_comp) != len(obj_ids):
-        print("Error: Length of labels_comp does not match length of obj_ids")
-        print(f"labels_comp: {labels_comp}")
-        print(f"obj_ids: {obj_ids}")
-        return []
-
-    if len(labels_comp) != len(masks):
-        print("Error: Length of labels_comp does not match length of masks")
-        print(f"labels_comp: {labels_comp}")
-        print(f"masks shape: {masks.shape}")
-        return []
-
-    annotations_yolo = []
-    for i in range(len(labels_comp)):
-        if i >= len(masks):
-            print(f"Skipping index {i} as it is out of bounds for masks with length {len(masks)}")
-            continue
-        
-        try:
-            pos = np.where(masks[i])
-        except IndexError as e:
-            print(f"IndexError at i={i}: {e}")
-            continue
-        
-        if pos[0].size == 0 or pos[1].size == 0:  # Check if the object has any presence in the mask
-            print(f"No valid positions found for object index {i}")
-            continue
-        
-        xmin = np.min(pos[1])
-        xmax = np.max(pos[1])
-        ymin = np.min(pos[0])
-        ymax = np.max(pos[0])
-        
-        annotations_yolo.append([labels_comp[i], (xmin + xmax) / 2 / comp_w, (ymin + ymax) / 2 / comp_h, (xmax - xmin) / comp_w, (ymax - ymin) / comp_h])
-    
-    return annotations_yolo
 
 def generate_dataset(imgs_number: int, folder: str, split: str = "train") -> None:
     """
@@ -1426,7 +1233,7 @@ if args.format == "yolo":
     classes_yaml_content = OrderedDict(
         [
             ("path", os.path.abspath(root_directory)),
-            ("train", os.path.abspath(train_path)),
+            ("train", os.path.abspath(train_patht)),
             ("test", os.path.abspath(test_path)),
             ("val", os.path.abspath(val_path)),
             ("nc", class_number),
@@ -1434,7 +1241,7 @@ if args.format == "yolo":
         ]
     )
 
-    # Custom YAML representer for OrderedDict to ensure correct order
+    # Cusom YAML representer for OrderedDict to ensure correct order
     class NoAliasDumper(yaml.SafeDumper):
         def ignore_aliases(self, data):
             return True
@@ -1488,5 +1295,83 @@ else:
 
 '''still need to debugg labelmap.txt Also need to ensure that classes.yaml is removed by debugging'''
 
+import cv2
+import matplotlib.pyplot as plt
+import os
+import random
+
+def visualize_yolo_bboxes(image_path: str, yolo_txt_path: str, class_names: list):
+    """
+    Visualizes YOLO bounding boxes on an image.
+
+    Parameters:
+        image_path (str): The path to the image file.
+        yolo_txt_path (str): The path to the YOLO text file containing bounding box annotations.
+        class_names (list): A list of class names corresponding to the class IDs in the YOLO file.
+    """
+    # Load the image
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    height, width, _ = image.shape
+
+    # Load the YOLO annotations
+    with open(yolo_txt_path, 'r') as file:
+        lines = file.readlines()
+
+    # Parse the YOLO annotations and draw bounding boxes
+    for line in lines:
+        class_id, x_center, y_center, w, h = map(float, line.strip().split())
+        x_center, y_center, w, h = x_center * width, y_center * height, w * width, h * height
+        x_min, y_min = int(x_center - w / 2), int(y_center - h / 2)
+        x_max, y_max = int(x_center + w / 2), int(y_center + h / 2)
+
+        # Draw the bounding box
+        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
+        cv2.putText(image, class_names[int(class_id)], (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
+    # Display the image with bounding boxes
+    plt.figure(figsize=(12, 8))
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()
+
+def visualize_random_image_from_set(set_name: str, class_names: list):
+    """
+    Visualizes a random image and its corresponding YOLO annotations from a specified set.
+
+    Parameters:
+        set_name (str): The name of the set ('train', 'test', or 'validation').
+        class_names (list): A list of class names corresponding to the class IDs in the YOLO file.
+    """
+    set_path = os.path.join('/home/nalkuq/cmm/dataset', set_name)
+    images_path = os.path.join(set_path, 'images')
+    labels_path = os.path.join(set_path, 'labels')
+
+    # Choose a random image file
+    image_file = random.choice(os.listdir(images_path))
+    image_path = os.path.join(images_path, image_file)
+
+    # Construct the corresponding label file path
+    label_file = os.path.splitext(image_file)[0] + '.txt'
+    yolo_txt_path = os.path.join(labels_path, label_file)
+
+    # Visualize the image with bounding boxes
+    visualize_yolo_bboxes(image_path, yolo_txt_path, class_names)
+
+def main():
+    class_names = obj_list()
+    class_names = get_classes(data)
+
+    print("Visualizing a random image from the training set:")
+    visualize_random_image_from_set('train', class_names)
+
+    print("Visualizing a random image from the test set:")
+    visualize_random_image_from_set('test', class_names)
+
+    print("Visualizing a random image from the validation set:")
+    visualize_random_image_from_set('val', class_names)
+
+if __name__ == "__main__":
+    main()
 
 
