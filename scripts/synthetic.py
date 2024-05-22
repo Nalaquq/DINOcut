@@ -18,15 +18,15 @@ from colorama import init, Fore, Back, Style
 import emoji
 import shutil
 from pyfiglet import Figlet
+import random 
+
 
 f = Figlet(font='slant')
-print(f.renderText('Cut Paste Learn'))
+print(Fore.GREEN+f.renderText('Cut Paste Learn'))
 
 # Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
 warnings.filterwarnings("ignore")
 init()
-warnings.filterwarnings("ignore")
-
 
 parser = argparse.ArgumentParser(
     description="Generates Synthetic Datasets for Object Detection."
@@ -63,7 +63,7 @@ parser.add_argument(
     "-min",
     type=int,
     help="the minimum size of images produced. The default is 150px.",
-    default=150,
+    default=500,
 )
 # this will throw an error is a max size is selected that is larger than the background image size. Fix this.
 parser.add_argument(
@@ -86,13 +86,15 @@ parser.add_argument(
     help="The location of the config.yaml file containing your albumentations configurations. If not selected synthetic.py will try to load config.py",
     default="dinocut_config.yaml",
 )
+
 parser.add_argument(
     "-format",
     "-label_format",
     type=str,
     help="The annotation style for synthetic data generation. Optoins include voc, coc, and yolo (all lowercase strings). Default is set to yolo.",
-    default="coco",
+    default="yolo",
 )
+
 args = parser.parse_args()
 
 if args.src:
@@ -105,9 +107,7 @@ else:
 if args.config:
     yaml_path = args.config
 else:
-    yaml_path = "dinocut_config.yaml"
-
-
+    yaml_path = "synthetic_config.yaml"
 
 def obj_list():
     """
@@ -187,34 +187,26 @@ files_bg_noise_masks = [
     os.path.join(PATH_MAIN, "bg_noise", "masks", f) for f in files_bg_noise_masks
 ]
 
-
 def get_img_and_mask(img_path: str, mask_path: str) -> tuple[np.ndarray, np.ndarray]:
     """
-        Load an image and its corresponding mask from specified file paths, convert both to RGB format, and process the mask into a binary format.
+    Load an image and its corresponding mask from specified file paths, convert both to RGB format, and process the mask into a binary format.
 
-        Parameters:
-            img_path (str): The file path to the image.
-            mask_path (str): The file path to the mask image.
+    Parameters:
+        img_path (str): The file path to the image.
+        mask_path (str): The file path to the mask image.
 
-        Returns:
-            Tuple[np.ndarray, np.ndarray]: A tuple containing the RGB image and the binary mask as NumPy arrays.
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: A tuple containing the RGB image and the binary mask as NumPy arrays.
 
-        Raises:
-            IOError: If the files specified do not exist or cannot be opened.
-            ValueError: If the image files are not in a format that can be converted to RGB.
+    Raises:
+        IOError: If the files specified do not exist or cannot be opened.
+        ValueError: If the image files are not in a format that can be converted to RGB.
 
-        Example:
-            >>> image, binary_mask = get_img_and_mask("path/to/image.jpg", "path/to/mask.jpg")
-            This will load the image and mask from the specified paths, convert them to RGB, and convert the mask to a binary format.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Example:
+        >>> image, binary_mask = get_img_and_mask("path/to/image.jpg", "path/to/mask.jpg")
+        This will load the image and mask from the specified paths, convert them to RGB, and convert the mask to a binary format.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     img = cv2.imread(img_path)
     if img is None:
@@ -238,34 +230,27 @@ def resize_img(
     img: np.ndarray, desired_max: int, desired_min: int = None
 ) -> np.ndarray:
     """
-        Resize an image to the specified maximum and optional minimum dimensions, maintaining aspect ratio.
+    Resize an image to the specified maximum and optional minimum dimensions, maintaining aspect ratio.
 
-        Parameters:
-            img (np.ndarray): The input image as a NumPy array.
-            desired_max (_int_): The maximum size for the longest dimension of the image.
-            desired_min (Optional[_int_]): The minimum size for the shortest dimension of the image.
-                If None, the aspect ratio is maintained.
+    Parameters:
+        img (np.ndarray): The input image as a NumPy array.
+        desired_max (_int_): The maximum size for the longest dimension of the image.
+        desired_min (Optional[_int_]): The minimum size for the shortest dimension of the image.
+            If None, the aspect ratio is maintained.
 
-        Returns:
-            np.ndarray: The resized image as a NumPy array.
+    Returns:
+        np.ndarray: The resized image as a NumPy array.
 
-        Raises:
-            ValueError: If any of the input dimensions are not positive integers.
+    Raises:
+        ValueError: If any of the input dimensions are not positive integers.
 
-        Example:
-            >>> img_resized = resize_img(image_array, 800, 600)
-            This would resize `image_array` to have the longest dimension be 800 pixels, and the
-            shortest dimension proportionally resized to maintain aspect ratio, unless 600 is provided,
-            then it resizes the shortest dimension to 600 pixels directly.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Example:
+        >>> img_resized = resize_img(image_array, 800, 600)
+        This would resize `image_array` to have the longest dimension be 800 pixels, and the
+        shortest dimension proportionally resized to maintain aspect ratio, unless 600 is provided,
+        then it resizes the shortest dimension to 600 pixels directly.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     h, w = img.shape[0], img.shape[1]
 
@@ -293,7 +278,6 @@ def resize_img(
     img_r = transformed["image"]
 
     return img_r
-
 
 def load_transformations_from_yaml(yaml_path: str) -> list:
     """
@@ -328,7 +312,6 @@ def load_transformations_from_yaml(yaml_path: str) -> list:
     print(Fore.BLUE+ "Background and Object Transformations loaded successfully.")
     return transformations
 
-
 transformation_objects = load_transformations_from_yaml(yaml_path)
 transforms_bg_obj = transformation_objects["transforms_bg_obj"]
 transforms_obj = transformation_objects["transforms_obj"]
@@ -341,35 +324,28 @@ def resize_transform_obj(
     transforms: bool = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
-        Resizes an image and its corresponding mask to a new size, randomly determined within specified bounds for the longest dimension, and optionally applies additional transformations.
+    Resizes an image and its corresponding mask to a new size, randomly determined within specified bounds for the longest dimension, and optionally applies additional transformations.
 
-        Parameters:
-            img (np.ndarray): The image to be transformed, expected to be a NumPy array.
-            mask (np.ndarray): The mask corresponding to the image, expected to be a NumPy array of the same dimensions as the image.
-            longest_min (int): The minimum value for the longest dimension of the resized image and mask.
-            longest_max (int): The maximum value for the longest dimension of the resized image and mask.
-            transforms (bool): A function or composed set of transformations to apply to the resized image and mask. If False, no additional transformations are applied.
+    Parameters:
+        img (np.ndarray): The image to be transformed, expected to be a NumPy array.
+        mask (np.ndarray): The mask corresponding to the image, expected to be a NumPy array of the same dimensions as the image.
+        longest_min (int): The minimum value for the longest dimension of the resized image and mask.
+        longest_max (int): The maximum value for the longest dimension of the resized image and mask.
+        transforms (bool): A function or composed set of transformations to apply to the resized image and mask. If False, no additional transformations are applied.
 
-        Returns:
-            Tuple[np.ndarray, np.ndarray]: A tuple containing the resized and possibly transformed image and mask.
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: A tuple containing the resized and possibly transformed image and mask.
 
-        Raises:
-            ValueError: If the `longest_min` is greater than `longest_max`.
-            IndexError: If the dimensions of `mask` do not match the dimensions of `img`.
+    Raises:
+        ValueError: If the `longest_min` is greater than `longest_max`.
+        IndexError: If the dimensions of `mask` do not match the dimensions of `img`.
 
-        Example:
-            >>> image, mask = resize_transform_obj(image_array, mask_array, 300, 500)
-            This will resize `image_array` and `mask_array` to a random size between 300 and 500 pixels for the longest dimension,
-            maintaining the aspect ratio, and apply additional transformations if provided.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Example:
+        >>> image, mask = resize_transform_obj(image_array, mask_array, 300, 500)
+        This will resize `image_array` and `mask_array` to a random size between 300 and 500 pixels for the longest dimension,
+        maintaining the aspect ratio, and apply additional transformations if provided.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     h, w = mask.shape[:2]
 
@@ -395,7 +371,6 @@ def resize_transform_obj(
 
     return img_t, mask_t
 
-
 def add_obj(
     img_comp: np.ndarray,
     mask_comp: np.ndarray,
@@ -406,34 +381,27 @@ def add_obj(
     idx: int,
 ) -> tuple:
     """
-        Incorporates an object and its mask into an existing image composition at specified coordinates.
+    Incorporates an object and its mask into an existing image composition at specified coordinates.
 
-        Parameters:
-            img_comp (np.ndarray): The existing composition of images in which the new image will be integrated.
-            mask_comp (np.ndarray): The existing composition of masks corresponding to img_comp.
-            img (np.ndarray): The image of the object to be added.
-            mask (np.ndarray): The binary mask of the object to be added.
-            x (int): The x-coordinate where the center of the object image is to be placed.
-            y (int): The y-coordinate where the center of the object image is to be placed.
-            idx (int): The index used to identify the object in the mask composition.
+    Parameters:
+        img_comp (np.ndarray): The existing composition of images in which the new image will be integrated.
+        mask_comp (np.ndarray): The existing composition of masks corresponding to img_comp.
+        img (np.ndarray): The image of the object to be added.
+        mask (np.ndarray): The binary mask of the object to be added.
+        x (int): The x-coordinate where the center of the object image is to be placed.
+        y (int): The y-coordinate where the center of the object image is to be placed.
+        idx (int): The index used to identify the object in the mask composition.
 
-        Returns:
-            tuple: A tuple containing the updated image composition, mask composition, and the segment of the added mask.
+    Returns:
+        tuple: A tuple containing the updated image composition, mask composition, and the segment of the added mask.
 
-        Description:
-            The function adjusts the coordinates to ensure the object image is centered at the specified (x, y) location.
-            It then calculates the intersection of the object image with the bounds of the image composition, applies the object
-            image and mask to the corresponding regions, and updates the mask composition using the provided idx. The function
-            handles different cases based on the boundaries and whether the specified coordinates are inside the composition.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Description:
+        The function adjusts the coordinates to ensure the object image is centered at the specified (x, y) location.
+        It then calculates the intersection of the object image with the bounds of the image composition, applies the object
+        image and mask to the corresponding regions, and updates the mask composition using the provided idx. The function
+        handles different cases based on the boundaries and whether the specified coordinates are inside the composition.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     h_comp, w_comp = img_comp.shape[0], img_comp.shape[1]
 
@@ -514,7 +482,6 @@ def add_obj(
 
     return img_comp, mask_comp, mask_added
 
-
 def create_bg_with_noise(
     files_bg_imgs: List[str],
     files_bg_noise_imgs: List[str],
@@ -527,36 +494,29 @@ def create_bg_with_noise(
     blank_bg: bool,
 ) -> np.ndarray:
     """
-        Creates a background image by optionally adding noise objects to either a plain or pre-existing background image.
+    Creates a background image by optionally adding noise objects to either a plain or pre-existing background image.
 
-        Parameters:
-            files_bg_imgs (List[str]): File paths to background images.
-            files_bg_noise_imgs (List[str]): File paths to noise images that can be added to the background.
-            files_bg_noise_masks (List[str]): File paths to masks corresponding to the noise images.
-            bg_max (int): The maximum dimension for resizing the background image.
-            bg_min (int): The minimum dimension for resizing the background image.
-            max_objs_to_add (int): The maximum number of noise objects to add to the background.
-            longest_bg_noise_max (int): The maximum dimension for resizing the noise objects.
-            longest_bg_noise_min (int): The minimum dimension for resizing the noise objects.
-            blank_bg (bool): If True, starts with a blank white background; otherwise, uses a random background image.
+    Parameters:
+        files_bg_imgs (List[str]): File paths to background images.
+        files_bg_noise_imgs (List[str]): File paths to noise images that can be added to the background.
+        files_bg_noise_masks (List[str]): File paths to masks corresponding to the noise images.
+        bg_max (int): The maximum dimension for resizing the background image.
+        bg_min (int): The minimum dimension for resizing the background image.
+        max_objs_to_add (int): The maximum number of noise objects to add to the background.
+        longest_bg_noise_max (int): The maximum dimension for resizing the noise objects.
+        longest_bg_noise_min (int): The minimum dimension for resizing the noise objects.
+        blank_bg (bool): If True, starts with a blank white background; otherwise, uses a random background image.
 
-        Returns:
-            np.ndarray: The generated background image with added noise objects in CV2 RGB format.
+    Returns:
+        np.ndarray: The generated background image with added noise objects in CV2 RGB format.
 
-        Notes:
-            This function randomly selects a background image from `files_bg_imgs` unless a blank background is specified.
-            It then randomly selects and adds noise objects up to `max_objs_to_add` times to the background. Each object and its
-            mask are resized and transformed before being added. The resizing and transformation of images depend on the specified
-            minimum and maximum dimensions. Noise objects are chosen randomly, and their placement on the background is also random.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Notes:
+        This function randomly selects a background image from `files_bg_imgs` unless a blank background is specified.
+        It then randomly selects and adds noise objects up to `max_objs_to_add` times to the background. Each object and its
+        mask are resized and transformed before being added. The resizing and transformation of images depend on the specified
+        minimum and maximum dimensions. Noise objects are chosen randomly, and their placement on the background is also random.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     if blank_bg:
         img_comp_bg = np.ones((bg_min, bg_max, 3), dtype=np.uint8) * 255
@@ -589,39 +549,32 @@ def create_bg_with_noise(
 
     return img_comp_bg
 
-
 def check_areas(
-    mask_comp: np.ndarray, obj_areas: list, overlap_degree: float = 0.3
+    mask_comp: np.ndarray, obj_areas: list, overlap_degree: float = args.io
 ) -> bool:
     """
-        Checks if the area overlap between objects in an image composition exceeds a specified degree.
+    Checks if the area overlap between objects in an image composition exceeds a specified degree.
 
-        Parameters:
-            mask_comp (np.ndarray): A 2D array representing the mask composition where different values correspond to different objects.
-            obj_areas (list): A list containing the area (in pixels) of each object when it was first placed in the composition.
-            overlap_degree (float, optional): The maximum allowable proportion of overlap relative to the original object area. Defaults to 0.3.
+    Parameters:
+        mask_comp (np.ndarray): A 2D array representing the mask composition where different values correspond to different objects.
+        obj_areas (list): A list containing the area (in pixels) of each object when it was first placed in the composition.
+        overlap_degree (float, optional): The maximum allowable proportion of overlap relative to the original object area. Defaults to 0.3.
 
-        Returns:
-            bool: True if the area overlaps are within the acceptable limits, False otherwise.
+    Returns:
+        bool: True if the area overlaps are within the acceptable limits, False otherwise.
 
-        Description:
-            The function compares the areas of each object in the composition mask to their original areas when first placed.
-            If any object's current area in the composition is less than its original area minus the allowed overlap degree,
-            it suggests significant overlap with other objects and the function returns False. This is crucial for applications
-            where object independence in detection or analysis is necessary.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Description:
+        The function compares the areas of each object in the composition mask to their original areas when first placed.
+        If any object's current area in the composition is less than its original area minus the allowed overlap degree,
+        it suggests significant overlap with other objects and the function returns False. This is crucial for applications
+        where object independence in detection or analysis is necessary.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     obj_ids = np.unique(mask_comp).astype(np.uint8)[
-        1:-1
+        1:-1 #-1
     ]  # Skip the background (typically 0) and exclude the last ID if unused
+    #print(obj_ids) debugging
     masks = mask_comp == obj_ids[:, None, None]
 
     ok = True  # Assume no excessive overlap by default
@@ -638,7 +591,6 @@ def check_areas(
             break
 
     return ok
-
 
 def create_composition(
     img_comp_bg: np.ndarray,
@@ -658,6 +610,15 @@ def create_composition(
     Returns:
         tuple: A tuple containing the composite image (np.ndarray), the composite mask (np.ndarray),
                a list of labels corresponding to the objects added (list), and a list of areas for each object mask (list).
+
+    Description:
+        The function iterates over a randomly determined number of objects (not exceeding max_objs) to add to the background.
+        Each object is selected from a pre-defined dictionary `obj_dict` which is expected to be generated by the `obj_list` function.
+        The objects are resized and transformed based on predefined criteria and are attempted to be added to the image composition,
+        checking for overlap constraints. If the placement of an object violates the overlap degree, the attempt is aborted and retried.
+        The process respects the maximum number of placement attempts for each object.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     obj_dict = obj_list()
     img_comp = img_comp_bg.copy()
@@ -671,119 +632,7 @@ def create_composition(
     i = 1
 
     for _ in range(1, num_objs):
-        obj_idx = np.random.randint(len(obj_dict))  # + 1
-
-        for _ in range(max_attempts_per_obj):
-            imgs_number = len(obj_dict[obj_idx]["images"])
-            idx = np.random.randint(imgs_number)
-            img_path = obj_dict[obj_idx]["images"][idx]
-            mask_path = obj_dict[obj_idx]["masks"][idx]
-            img, mask = get_img_and_mask(img_path, mask_path)
-
-            x, y = np.random.randint(w), np.random.randint(h)
-            longest_min = obj_dict[obj_idx]["longest_min"]
-            longest_max = obj_dict[obj_idx]["longest_max"]
-            img, mask = resize_transform_obj(
-                img, mask, longest_min, longest_max, transforms=transforms_obj
-            )
-
-            if i == 1:
-                img_comp, mask_comp, mask_added = add_obj(
-                    img_comp, mask_comp, img, mask, x, y, i
-                )
-                obj_areas.append(np.count_nonzero(mask_added))
-                labels_comp.append(i)  # Ensure non-zero label and incrementing correctly
-                i += 1
-                break
-            else:
-                img_comp_prev, mask_comp_prev = img_comp.copy(), mask_comp.copy()
-                img_comp, mask_comp, mask_added = add_obj(
-                    img_comp, mask_comp, img, mask, x, y, i
-                )
-                ok = check_areas(mask_comp, obj_areas, overlap_degree)
-                if ok:
-                    obj_areas.append(np.count_nonzero(mask_added))
-                    labels_comp.append(i)  # Ensure non-zero label and incrementing correctly
-                    i += 1
-                    break
-                else:
-                    img_comp, mask_comp = img_comp_prev.copy(), mask_comp_prev.copy()
-
-    # Additional debugging logs
-    unique_ids = np.unique(mask_comp)
-    obj_ids = unique_ids[unique_ids != 0]  # Ensure background ID (0) is excluded
-
-    print(f"Number of objects placed: {len(labels_comp)}")
-    print(f"Unique object IDs in mask: {unique_ids}")
-    print(f"Labels composition: {labels_comp}")
-    print(f"Length of labels_comp: {len(labels_comp)}")
-    print(f"Length of masks: {len(obj_ids)}")
-    print(f"obj_ids: {obj_ids}")
-    print(f"mask_comp shape: {mask_comp.shape}")
-    print(f"labels_comp: {labels_comp}")
-
-    # Check length match before returning
-    if len(labels_comp) != len(obj_ids):
-        print(f"Mismatch: labels_comp ({len(labels_comp)}) vs. obj_ids ({len(obj_ids)})")
-        print(f"Length of labels_comp: {len(labels_comp)}")
-        print(f"Length of masks: {len(obj_ids)}")
-        print(f"obj_ids: {obj_ids}")
-        print(f"mask_comp shape: {mask_comp.shape}")
-        print(f"labels_comp: {labels_comp}")
-        raise ValueError("Error: Length of labels_comp does not match length of obj_ids")
-
-    return img_comp, mask_comp, labels_comp, obj_areas
-
-
-'''
-def create_composition(
-    img_comp_bg: np.ndarray,
-    max_objs: int,
-    overlap_degree: float,
-    max_attempts_per_obj: int,
-) -> tuple:
-    """
-        Creates a composite image by randomly placing objects onto a background image with constraints on overlap and number of attempts.
-
-        Parameters:
-            img_comp_bg (np.ndarray): The background image on which objects will be added.
-            max_objs (int): The maximum number of objects to attempt to add to the background.
-            overlap_degree (float): A threshold for the acceptable degree of overlap between objects.
-            max_attempts_per_obj (int): The maximum number of attempts to place each object before moving to the next.
-
-        Returns:
-            tuple: A tuple containing the composite image (np.ndarray), the composite mask (np.ndarray),
-                   a list of labels corresponding to the objects added (list), and a list of areas for each object mask (list).
-
-        Description:
-            The function iterates over a randomly determined number of objects (not exceeding max_objs) to add to the background.
-            Each object is selected from a pre-defined dictionary `obj_dict` which is expected to be generated by the `obj_list` function.
-            The objects are resized and transformed based on predefined criteria and are attempted to be added to the image composition,
-            checking for overlap constraints. If the placement of an object violates the overlap degree, the attempt is aborted and retried.
-            The process respects the maximum number of placement attempts for each object.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
-    """
-    obj_dict = obj_list()
-    img_comp = img_comp_bg.copy()
-    h, w = img_comp.shape[0], img_comp.shape[1]
-    mask_comp = np.zeros((h, w), dtype=np.uint8)
-
-    obj_areas = []
-    labels_comp = []
-    num_objs = np.random.randint(max_objs) + 2
-
-    i = 1
-
-    for _ in range(1, num_objs):
-        obj_idx = np.random.randint(len(obj_dict))  # + 1
+        obj_idx = np.random.randint(len(obj_dict))   #+ 1
 
         for _ in range(max_attempts_per_obj):
             imgs_number = len(obj_dict[obj_idx]["images"])
@@ -823,40 +672,19 @@ def create_composition(
 
     return img_comp, mask_comp, labels_comp, obj_areas
 
-'''
-'''
-def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> list:
-    """
-        Generate YOLO format annotations for objects identified in a mask with associated labels.
-
-        Parameters:
-            mask_comp (np.ndarray): A 2D array where each pixel's integer value represents the object ID.
-            labels_comp (np.ndarray): An array containing the labels corresponding to each object ID in mask_comp.
-
-        Returns:
-            list: A list of lists, where each inner list contains normalized bounding box information
-                  and the label for an object in YOLO format ([class_id, x_center, y_center, width, height]).
-
-        Notes:
-            The function expects `mask_comp` to be a grayscale image where different values correspond to
-            different objects. `labels_comp` is expected to be an array where each entry corresponds to a label
-            for the objects identified in `mask_comp`. The function calculates the bounding box coordinates for
-            each object, normalizes these coordinates relative to the dimensions of `mask_comp`, and formats
-            them according to the YOLO annotation standard.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
-    """
+def create_yolo_annotations(mask_comp, labels_comp):
     comp_w, comp_h = mask_comp.shape[1], mask_comp.shape[0]
-
+    
     obj_ids = np.unique(mask_comp).astype(np.uint8)[1:]
     masks = mask_comp == obj_ids[:, None, None]
+
+    # Adjust labels_comp length to match masks length
+    if len(masks) != len(labels_comp):
+        if len(masks) < len(labels_comp):
+            labels_comp = labels_comp[:len(masks)]
+        else:
+            print(f"Warning: Not enough labels for all objects. Expecting {len(masks)}, but got {len(labels_comp)}.")
+            labels_comp.extend([-1] * (len(masks) - len(labels_comp)))  # Adding placeholder labels
 
     annotations_yolo = []
     for i in range(len(labels_comp)):
@@ -871,151 +699,93 @@ def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> l
         w = xmax - xmin
         h = ymax - ymin
 
-        annotations_yolo.append(
-            [
-                labels_comp[i],
-                round(xc / comp_w, 5),
-                round(yc / comp_h, 5),
-                round(w / comp_w, 5),
-                round(h / comp_h, 5),
-            ]
-        )
+        annotations_yolo.append([labels_comp[i],
+                                 round(xc/comp_w, 5),
+                                 round(yc/comp_h, 5),
+                                 round(w/comp_w, 5),
+                                 round(h/comp_h, 5)])
 
-    return annotations_yolo
-'''
-def create_yolo_annotations(mask_comp: np.ndarray, labels_comp: np.ndarray) -> list:
-    """
-    Generate YOLO format annotations for objects identified in a mask with associated labels.
-
-    Parameters:
-        mask_comp (np.ndarray): A 2D array where each pixel's integer value represents the object ID.
-        labels_comp (np.ndarray): An array containing the labels corresponding to each object ID in mask_comp.
-
-    Returns:
-        list: A list of lists, where each inner list contains normalized bounding box information
-              and the label for an object in YOLO format ([class_id, x_center, y_center, width, height]).
-    """
-    comp_w, comp_h = mask_comp.shape[1], mask_comp.shape[0]
-
-    obj_ids = np.unique(mask_comp).astype(np.uint8)[1:]
-    masks = mask_comp == obj_ids[:, None, None]
-
-    # Debug prints to check sizes and contents
-    print(f"Length of labels_comp: {len(labels_comp)}")
-    print(f"Length of masks: {len(masks)}")
-    print(f"obj_ids: {obj_ids}")
-    print(f"mask_comp shape: {mask_comp.shape}")
-    print(f"labels_comp: {labels_comp}")
-
-    if len(labels_comp) != len(obj_ids):
-        print("Error: Length of labels_comp does not match length of obj_ids")
-        print(f"labels_comp: {labels_comp}")
-        print(f"obj_ids: {obj_ids}")
-        return []
-
-    if len(labels_comp) != len(masks):
-        print("Error: Length of labels_comp does not match length of masks")
-        print(f"labels_comp: {labels_comp}")
-        print(f"masks shape: {masks.shape}")
-        return []
-
-    annotations_yolo = []
-    for i in range(len(labels_comp)):
-        if i >= len(masks):
-            print(f"Skipping index {i} as it is out of bounds for masks with length {len(masks)}")
-            continue
-        
-        try:
-            pos = np.where(masks[i])
-        except IndexError as e:
-            print(f"IndexError at i={i}: {e}")
-            continue
-        
-        if pos[0].size == 0 or pos[1].size == 0:  # Check if the object has any presence in the mask
-            print(f"No valid positions found for object index {i}")
-            continue
-        
-        xmin = np.min(pos[1])
-        xmax = np.max(pos[1])
-        ymin = np.min(pos[0])
-        ymax = np.max(pos[0])
-        
-        annotations_yolo.append([labels_comp[i], (xmin + xmax) / 2 / comp_w, (ymin + ymax) / 2 / comp_h, (xmax - xmin) / comp_w, (ymax - ymin) / comp_h])
-    
     return annotations_yolo
 
 def generate_dataset(imgs_number: int, folder: str, split: str = "train") -> None:
     """
-        Generates a dataset of synthetic images and corresponding annotations based on specified parameters.
+    Generates a dataset of synthetic images and corresponding annotations based on specified parameters.
 
-        Parameters:
-            imgs_number (int): The number of images to generate.
-            folder (str): The base directory where the dataset should be stored.
-            split (str, optional): The category of the dataset, e.g., 'train', 'test', 'val'. Defaults to 'train'.
+    Parameters:
+        imgs_number (int): The number of images to generate.
+        folder (str): The base directory where the dataset should be stored.
+        split (str, optional): The category of the dataset, e.g., 'train', 'test', 'val'. Defaults to 'train'.
 
-        Description:
-            This function generates a specified number of synthetic images by creating backgrounds with noise
-            and adding compositions of objects. Each image is then saved in a specified folder under a specific
-            dataset split category. Corresponding annotations in YOLO format are also generated and saved.
-            Execution time per image and total time are calculated and printed at the end of the run.
+    Description:
+        This function generates a specified number of synthetic images by creating backgrounds with noise
+        and adding compositions of objects. Each image is then saved in a specified folder under a specific
+        dataset split category. Corresponding annotations in YOLO format are also generated and saved.
+        Execution time per image and total time are calculated and printed at the end of the run.
 
-        Effects:
-            - Images are saved to '{folder}/{split}/images' directory.
-            - Annotations are saved to '{folder}/{split}/labels' directory.
-            - Prints the total time taken and time per image to the console.
+    Effects:
+        - Images are saved to '{folder}/{split}/images' directory.
+        - Annotations are saved to '{folder}/{split}/labels' directory.
+        - Prints the total time taken and time per image to the console.
 
-        Raises:
-            IOError: If there are issues writing the files to the disk.
-            Exception: If any of the called functions (`create_bg_with_noise`, `create_composition`, etc.) fail.
-        Citation:
-            Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
-            Original Conceptual Credit: @InProceedings{Dwibedi_2017_ICCV,
-    author = {Dwibedi, Debidatta and Misra, Ishan and Hebert, Martial},
-    title = {Cut, Paste and Learn: Surprisingly Easy Synthesis for Instance Detection},
-    booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
-    month = {Oct},
-    year = {2017}
-    }
+    Raises:
+        IOError: If there are issues writing the files to the disk.
+        Exception: If any of the called functions (`create_bg_with_noise`, `create_composition`, etc.) fail.
+    Citation:
+        Function modified from https://github.com/alexppppp/synthetic-dataset-object-detection.
     """
     time_start = time.time()
     timing = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+    
     for j in tqdm(range(imgs_number)):
-        img_comp_bg = create_bg_with_noise(
-            files_bg_imgs,
-            files_bg_noise_imgs,
-            files_bg_noise_masks,
-            max_objs_to_add=60,
-            bg_max=1920,
-            bg_min=1080,
-            longest_bg_noise_max=1000,
-            longest_bg_noise_min=200,
-            blank_bg=False,
-        )
+        while True:
+            try:
+                img_comp_bg = create_bg_with_noise(
+                    files_bg_imgs,
+                    files_bg_noise_imgs,
+                    files_bg_noise_masks,
+                    max_objs_to_add=60,
+                    bg_max=1920,
+                    bg_min=1080,
+                    longest_bg_noise_max=1000,
+                    longest_bg_noise_min=200,
+                    blank_bg=False,
+                )
 
-        img_comp, mask_comp, labels_comp, _ = create_composition(
-            img_comp_bg,
-            max_objs=args.max_obj,
-            overlap_degree=args.io,
-            max_attempts_per_obj=10,
-        )
+                img_comp, mask_comp, labels_comp, _ = create_composition(
+                    img_comp_bg,
+                    max_objs=args.max_obj,
+                    overlap_degree=args.io,
+                    max_attempts_per_obj=10,
+                )
 
-        img_comp = cv2.cvtColor(img_comp, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(
-            os.path.join(folder, split, "images/{}" + timing + ".jpg").format(j),
-            img_comp,
-        )
+                annotations_yolo = create_yolo_annotations(mask_comp, labels_comp)
 
-        annotations_yolo = create_yolo_annotations(mask_comp, labels_comp)
-        for i in range(len(annotations_yolo)):
-            with open(
-                os.path.join(folder, split, "labels/{}" + timing + ".txt").format(j),
-                "a",
-            ) as f:
-                f.write(" ".join(str(el) for el in annotations_yolo[i]) + "\n")
+                if not annotations_yolo:
+                    raise ValueError("No annotations found, regenerating the image...")
+
+                # If there are annotations, save the image and break the loop
+                img_comp = cv2.cvtColor(img_comp, cv2.COLOR_RGB2BGR)
+                cv2.imwrite(
+                    os.path.join(folder, split, "images/{}" + timing + ".jpg").format(j),
+                    img_comp,
+                )
+
+                for i in range(len(annotations_yolo)):
+                    with open(
+                        os.path.join(folder, split, "labels/{}" + timing + ".txt").format(j),
+                        "a",
+                    ) as f:
+                        f.write(" ".join(str(el) for el in annotations_yolo[i]) + "\n")
+                
+                break  # Exit the while loop since the image and annotations are saved successfully
+
+            except ValueError as e:
+                print(e)
+                continue  # Regenerate the image if no annotations are found
+
     time_end = time.time()
     time_total = round(time_end - time_start)
     time_per_img = round((time_end - time_start) / imgs_number, 1)
-
     print(Fore.BLUE +
         "Generation of {} synthetic images is completed. It took {} seconds, or {} seconds per image".format(
             imgs_number, time_total, time_per_img
@@ -1025,7 +795,6 @@ def generate_dataset(imgs_number: int, folder: str, split: str = "train") -> Non
     print(
         Fore.GREEN +"Annotations are stored in '{}'".format(os.path.join(folder, split, "labels"))
     )
-
 
 def mkdir() -> None:
     """
@@ -1148,9 +917,8 @@ def test_train_val_split() -> None:
         print(Fore.BLUE+
             f"\n {total_dataset} images and labels will be split into a 80/10/10 training/test/validation set containing: \n {training_set} training images \n {test_set} test images \n {validation_set} validation images."
         )
-    print(test_set)
+    #print(test_set)
     return test_set, training_set, validation_set
-
 
 def get_classes(data: Dict[int, Dict[str, int]]) -> List[str]:
     """
@@ -1164,7 +932,6 @@ def get_classes(data: Dict[int, Dict[str, int]]) -> List[str]:
         List[str]: A list of values from the 'folder' key in each sub-dictionary.
     """
     return [sub_dict["folder"] for sub_dict in data.values()]
-
 
 def generate_directory_structure(root_dir: str) -> Dict[str, Any]:
     """
@@ -1190,7 +957,6 @@ def generate_directory_structure(root_dir: str) -> Dict[str, Any]:
 
     return directory_structure
 
-
 def get_path_from_structure(structure: Dict[str, Any], *path: str) -> Optional[str]:
     """
     Retrieves the relative path from the directory structure.
@@ -1210,6 +976,36 @@ def get_path_from_structure(structure: Dict[str, Any], *path: str) -> Optional[s
             return None
     return os.path.join(*path) if isinstance(current_level, dict) else None
 
+def convert_yolo_to_coco(yolo_label_path: str, coco_annotations: List[Dict[str, Any]], image_id: int, category_id: int, image_width: int, image_height: int):
+    """
+    Converts a YOLO label to COCO format and appends it to the provided COCO annotations list.
+    
+    Args:
+        yolo_label_path (str): Path to the YOLO label file.
+        coco_annotations (List[Dict[str, Any]]): List to append the COCO annotations to.
+        image_id (int): ID of the image.
+        category_id (int): ID of the category.
+        image_width (int): Width of the image.
+        image_height (int): Height of the image.
+    """
+    with open(yolo_label_path, 'r') as file:
+        for line in file:
+            class_id, x_center, y_center, width, height = map(float, line.strip().split())
+            x_center *= image_width
+            y_center *= image_height
+            width *= image_width
+            height *= image_height
+            x_min = x_center - width / 2
+            y_min = y_center - height / 2
+            
+            annotation = {
+                "image_id": image_id,
+                "category_id": category_id,
+                "bbox": [x_min, y_min, width, height],
+                "area": width * height,
+                "iscrowd": 0
+            }
+            coco_annotations.append(annotation)
 
 def convert_yolo_to_voc(yolo_label_path: str, voc_label_path: str, image_width: int, image_height: int):
     """
@@ -1246,37 +1042,6 @@ def convert_yolo_to_voc(yolo_label_path: str, voc_label_path: str, image_width: 
     
     tree = ET.ElementTree(annotation)
     tree.write(voc_label_path)
-
-def convert_yolo_to_coco(yolo_label_path: str, coco_annotations: List[Dict[str, Any]], image_id: int, category_id: int, image_width: int, image_height: int):
-    """
-    Converts a YOLO label to COCO format and appends it to the provided COCO annotations list.
-    
-    Args:
-        yolo_label_path (str): Path to the YOLO label file.
-        coco_annotations (List[Dict[str, Any]]): List to append the COCO annotations to.
-        image_id (int): ID of the image.
-        category_id (int): ID of the category.
-        image_width (int): Width of the image.
-        image_height (int): Height of the image.
-    """
-    with open(yolo_label_path, 'r') as file:
-        for line in file:
-            class_id, x_center, y_center, width, height = map(float, line.strip().split())
-            x_center *= image_width
-            y_center *= image_height
-            width *= image_width
-            height *= image_height
-            x_min = x_center - width / 2
-            y_min = y_center - height / 2
-            
-            annotation = {
-                "image_id": image_id,
-                "category_id": category_id,
-                "bbox": [x_min, y_min, width, height],
-                "area": width * height,
-                "iscrowd": 0
-            }
-            coco_annotations.append(annotation)
 
 def convert_labels(root_dir: str, conversion_type: str):
     """
@@ -1377,116 +1142,287 @@ def generate() -> None:
     """
     obj_list()
     mkdir()
-    # create the test, train, and validation split
     ttv = test_train_val_split()
-    # generate the test, train, and validation datasets
     generate_dataset(ttv[0], folder="dataset", split="test")
     generate_dataset(ttv[2], folder="dataset", split="val")
     generate_dataset(ttv[1], folder="dataset", split="train")
 
+def converter():
+    root_directory = "dataset"
+    directory_structure = generate_directory_structure(root_directory)
 
-generate()
-
-
-# Generate the directory structure for the dataset directory
-root_directory = "dataset"
-directory_structure = generate_directory_structure(root_directory)
-
-# Retrieve the paths
-train_path = get_path_from_structure(directory_structure, "dataset", "train")
-train_images_path = get_path_from_structure(
-    directory_structure, "dataset", "train", "images"
-)
-train_labels_path = get_path_from_structure(
-    directory_structure, "dataset", "train", "labels"
-)
-test_path = get_path_from_structure(directory_structure, "dataset", "test")
-test_images_path = get_path_from_structure(
-    directory_structure, "dataset", "test", "images"
-)
-test_labels_path = get_path_from_structure(
-    directory_structure, "dataset", "test", "labels"
-)
-val_path = get_path_from_structure(directory_structure, "dataset", "val")
-val_images_path = get_path_from_structure(
-    directory_structure, "dataset", "val", "images"
-)
-val_labels_path = get_path_from_structure(
-    directory_structure, "dataset", "val", "labels"
-)
-
-# Create a list of classes and the length of classes
-data = obj_list()
-class_names = get_classes(data)
-class_number = len(class_names)
-
-if args.format == "yolo":
-    print(Fore.BLUE+"\n Saving labels in YOLO format \n")
-    # Define the content of the classes.yaml file
-    classes_yaml_content = OrderedDict(
-        [
-            ("path", os.path.abspath(root_directory)),
-            ("train", os.path.abspath(train_path)),
-            ("test", os.path.abspath(test_path)),
-            ("val", os.path.abspath(val_path)),
-            ("nc", class_number),
-            ("names", class_names),
-        ]
+    # Retrieve the paths
+    train_path = get_path_from_structure(directory_structure, "dataset", "train")
+    train_images_path = get_path_from_structure(
+        directory_structure, "dataset", "train", "images"
+    )
+    train_labels_path = get_path_from_structure(
+        directory_structure, "dataset", "train", "labels"
+    )
+    test_path = get_path_from_structure(directory_structure, "dataset", "test")
+    test_images_path = get_path_from_structure(
+        directory_structure, "dataset", "test", "images"
+    )
+    test_labels_path = get_path_from_structure(
+        directory_structure, "dataset", "test", "labels"
+    )
+    val_path = get_path_from_structure(directory_structure, "dataset", "val")
+    val_images_path = get_path_from_structure(
+        directory_structure, "dataset", "val", "images"
+    )
+    val_labels_path = get_path_from_structure(
+        directory_structure, "dataset", "val", "labels"
     )
 
-    # Custom YAML representer for OrderedDict to ensure correct order
-    class NoAliasDumper(yaml.SafeDumper):
-        def ignore_aliases(self, data):
-            return True
+    # Create a list of classes and the length of classes
+    data = obj_list()
+    class_names = get_classes(data)
+    class_number = len(class_names)
 
-    def ordered_dict_representer(dumper, data):
-        return dumper.represent_dict(data.items())
-
-    yaml.add_representer(OrderedDict, ordered_dict_representer, Dumper=NoAliasDumper)
-    # Path to save the YAML file
-    yaml_file_path = os.path.join(root_directory, "classes.yaml")
-    # Save the content to classes.yaml
-    with open(yaml_file_path, "w") as yaml_file:
-        yaml.dump(
-            classes_yaml_content,
-            yaml_file,
-            Dumper=NoAliasDumper,
-            default_flow_style=False,
+    if args.format == "yolo":
+        print(Fore.BLUE+"\n Saving labels in YOLO format \n")
+        # Define the content of the classes.yaml file
+        classes_yaml_content = OrderedDict(
+            [
+                ("path", os.path.abspath(root_directory)),
+                ("train", os.path.abspath(train_path)),
+                ("test", os.path.abspath(test_path)),
+                ("val", os.path.abspath(val_path)),
+                ("nc", class_number),
+                ("names", class_names),
+            ]
         )
-    # Print results
-    print(Fore.BLUE+f"YAML file with name classes.yaml saved to {yaml_file_path}")
-    print(class_names, class_number)
-elif args.format == "voc":
-    print(Fore.BLUE+"\n Saving labels in VOC format \n")
-    root_directory = 'dataset'
-    conversion_type = 'voc'  
-    convert_labels(root_directory, conversion_type)
-    try: 
-        os.remove("classes.yaml")
-    except: 
+
+        # Custom YAML representer for OrderedDict to ensure correct order
+        class NoAliasDumper(yaml.SafeDumper):
+            def ignore_aliases(self, data):
+                return True
+
+        def ordered_dict_representer(dumper, data):
+            return dumper.represent_dict(data.items())
+
+        yaml.add_representer(OrderedDict, ordered_dict_representer, Dumper=NoAliasDumper)
+        # Path to save the YAML file
+        yaml_file_path = os.path.join(root_directory, "classes.yaml")
+        # Save the content to classes.yaml
+        with open(yaml_file_path, "w") as yaml_file:
+            yaml.dump(
+                classes_yaml_content,
+                yaml_file,
+                Dumper=NoAliasDumper,
+                default_flow_style=False,
+            )
+        # Print results
+        print(Fore.BLUE+f"YAML file with name classes.yaml saved to {yaml_file_path}")
+        print(class_names, class_number)
+    elif args.format == "voc":
+        print(Fore.BLUE+"\n Saving labels in VOC format \n")
+        root_directory = 'dataset'
+        conversion_type = 'voc'  
+        convert_labels(root_directory, conversion_type)
+        try: 
+            os.remove("classes.yaml")
+        except: 
+            pass
+        labelmap_path = os.path.join(root_directory, "labelmap.txt")
+        with open(labelmap_path, "w") as f:
+            for i, name in enumerate(class_names):
+                f.write(f"id: {i + 1}\n")
+                f.write(f"name: \"{name}\"\n")
+        print(Fore.GREEN+"\n Labels have been saved. A labelmap.txt file has been saved in /dataset")
+    elif args.format == "coco":
+        print(Fore.GREEN+"\n Saving labels in COCO format\n")
+        root_directory = 'dataset'
+        conversion_type = 'coco'
+        convert_labels(root_directory, conversion_type)
+        try: 
+            os.remove("classes.yaml")
+            os.remove("labelmap.txt")
+        except: 
+            pass
+        print(Fore.BLUE+"\n Labels have been saved. An annotation file has been saved in /dataset")
+    else:
         pass
-    labelmap_path = os.path.join(root_directory, "labelmap.txt")
-    with open(labelmap_path, "w") as f:
-        for i, name in enumerate(class_names):
-            f.write(f"id: {i + 1}\n")
-            f.write(f"name: \"{name}\"\n")
-    print(Fore.GREEN+"\n Labels have been saved. A labelmap.txt file has been saved in /dataset")
-elif args.format == "coco":
-    print(Fore.GREEN+"\n Saving labels in COCO format\n")
-    root_directory = 'dataset'
-    conversion_type = 'coco'
-    convert_labels(root_directory, conversion_type)
+
+def visualize_yolo_bboxes(image_path: str, yolo_txt_path: str, class_names: list):
+    """
+    Visualizes YOLO bounding boxes on an image.
+
+    Parameters:
+        image_path (str): The path to the image file.
+        yolo_txt_path (str): The path to the YOLO text file containing bounding box annotations.
+        class_names (list): A list of class names corresponding to the class IDs in the YOLO file.
+    """
+    # Load the image
+    image = cv2.imread(image_path)
+    if image is None:
+        raise FileNotFoundError(f"Image not found at path: {image_path}")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    height, width, _ = image.shape
+
+    # Load the YOLO annotations
+    with open(yolo_txt_path, 'r') as file:
+        lines = file.readlines()
+
+    # Parse the YOLO annotations and draw bounding boxes
+    for line in lines:
+        class_id, x_center, y_center, w, h = map(float, line.strip().split())
+        x_center, y_center, w, h = x_center * width, y_center * height, w * width, h * height
+        x_min, y_min = int(x_center - w / 2), int(y_center - h / 2)
+        x_max, y_max = int(x_center + w / 2), int(y_center + h / 2)
+
+        # Draw the bounding box
+        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
+        cv2.putText(image, class_names[int(class_id)], (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
+    # Display the image with bounding boxes
+    plt.figure(figsize=(12, 8))
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()
+
+def visualize_voc_bboxes(image_path: str, voc_xml_path: str, class_names: list):
+    """
+    Visualizes VOC bounding boxes on an image.
+
+    Parameters:
+        image_path (str): The path to the image file.
+        voc_xml_path (str): The path to the VOC XML file containing bounding box annotations.
+        class_names (list): A list of class names corresponding to the class IDs in the VOC file.
+    """
+    # Load the image
+    image = cv2.imread(image_path)
+    if image is None:
+        raise FileNotFoundError(f"Image not found at path: {image_path}")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Parse the VOC XML file
+    tree = ET.parse(voc_xml_path)
+    root = tree.getroot()
+
+    for obj in root.findall('object'):
+        class_name = obj.find('name').text
+        bbox = obj.find('bndbox')
+        x_min = int(bbox.find('xmin').text)
+        y_min = int(bbox.find('ymin').text)
+        x_max = int(bbox.find('xmax').text)
+        y_max = int(bbox.find('ymax').text)
+
+        # Draw the bounding box
+        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
+        cv2.putText(image, class_name, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
+    # Display the image with bounding boxes
+    plt.figure(figsize=(12, 8))
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()
+
+def visualize_coco_bboxes(image_path: str, coco_json_path: str, class_names: list, image_id: int):
+    """
+    Visualizes COCO bounding boxes on an image.
+
+    Parameters:
+        image_path (str): The path to the image file.
+        coco_json_path (str): The path to the COCO JSON file containing bounding box annotations.
+        class_names (list): A list of class names corresponding to the class IDs in the COCO file.
+        image_id (int): The ID of the image in the COCO JSON file.
+    """
+    # Load the image
+    image = cv2.imread(image_path)
+    if image is None:
+        raise FileNotFoundError(f"Image not found at path: {image_path}")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Load the COCO annotations
+    with open(coco_json_path, 'r') as file:
+        coco_data = json.load(file)
+
+    annotations = [ann for ann in coco_data['annotations'] if ann['image_id'] == image_id]
+
+    for ann in annotations:
+        class_id = ann['category_id']
+        x_min, y_min, width, height = map(int, ann['bbox'])
+        x_max, y_max = x_min + width, y_min + height
+
+        # Draw the bounding box
+        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
+        cv2.putText(image, class_names[class_id], (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
+    # Display the image with bounding boxes
+    plt.figure(figsize=(12, 8))
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()
+
+def visualize_random_image_from_set(set_name: str, class_names: list, annotation_format: str):
+    """
+    Visualizes a random image and its corresponding annotations from a specified set.
+
+    Parameters:
+        set_name (str): The name of the set ('train', 'test', or 'validation').
+        class_names (list): A list of class names corresponding to the class IDs in the annotations.
+        annotation_format (str): The format of the annotations ('yolo', 'voc', or 'coco').
+    """
+    set_path = os.path.join('/home/nalkuq/cmm/dataset', set_name)
+    images_path = os.path.join(set_path, 'images')
+    labels_path = os.path.join(set_path, 'labels')
+
+    # Choose a random image file
+    image_files = os.listdir(images_path)
+    if not image_files:
+        raise FileNotFoundError(f"No images found in directory: {images_path}")
+    
+    image_file = random.choice(image_files)
+    image_path = os.path.join(images_path, image_file)
+
+    if annotation_format == 'yolo':
+        label_file = os.path.splitext(image_file)[0] + '.txt'
+        yolo_txt_path = os.path.join(labels_path, label_file)
+        if not os.path.exists(yolo_txt_path):
+            raise FileNotFoundError(f"Label file not found for image: {image_file}")
+        visualize_yolo_bboxes(image_path, yolo_txt_path, class_names)
+
+    elif annotation_format == 'voc':
+        label_file = os.path.splitext(image_file)[0] + '.xml'
+        voc_xml_path = os.path.join(labels_path, label_file)
+        if not os.path.exists(voc_xml_path):
+            raise FileNotFoundError(f"Label file not found for image: {image_file}")
+        visualize_voc_bboxes(image_path, voc_xml_path, class_names)
+
+    elif annotation_format == 'coco':
+        coco_json_path = os.path.join(labels_path, 'annotations.json')
+        if not os.path.exists(coco_json_path):
+            raise FileNotFoundError(f"COCO annotations file not found at path: {coco_json_path}")
+
+        # COCO image IDs are usually provided in the annotations file. Assuming filenames match image IDs.
+        with open(coco_json_path, 'r') as file:
+            coco_data = json.load(file)
+            image_id = next(img['id'] for img in coco_data['images'] if img['file_name'] == image_file)
+
+        visualize_coco_bboxes(image_path, coco_json_path, class_names, image_id)
+    else:
+        raise ValueError(f"Unsupported annotation format: {annotation_format}")
+
+def main():
+    data = obj_list()
+    class_names = get_classes(data)
+    print(class_names)
+    generate()
+    converter()
     try: 
-        os.remove("classes.yaml")
-        os.remove("labelmap.txt")
+        print("Visualizing a random image from the training set:")
+        visualize_random_image_from_set('train', class_names, args.format)
+
+        print("Visualizing a random image from the test set:")
+        visualize_random_image_from_set('test', class_names, args.format)
+
+        print("Visualizing a random image from the validation set:")
+        visualize_random_image_from_set('val', class_names, args.format)
     except: 
+        print("Cannot visualize coco-style annotations.")
         pass
-    print(Fore.BLUE+"\n Labels have been saved. An annotation file has been saved in /dataset")
-else:
-    pass
-
-
-'''still need to debugg labelmap.txt Also need to ensure that classes.yaml is removed by debugging'''
-
+if __name__ == "__main__":
+    main()
 
 
