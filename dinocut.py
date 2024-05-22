@@ -689,7 +689,7 @@ def dinocut_generate():
             except:
                 pass
             # change to config file home directory. May have to also change argparse.
-            os.chdir("/home/nalkuq/DINOcut")
+            os.chdir(config["paths"]["home_directory"])
             cwd = os.getcwd()
             for files in os.listdir(cwd):
                 if files.endswith(".png"):
@@ -735,7 +735,7 @@ def dinocut_generate():
                 except:
                     pass
                 # change to config file home directory. May have to also change argparse.
-                os.chdir("/home/nalkuq/DINOcut")
+                os.chdir(config["paths"]["home_directory"])
                 cwd = os.getcwd()
                 for files in os.listdir(cwd):
                     if files.endswith(".png"):
