@@ -1364,7 +1364,7 @@ def visualize_random_image_from_set(set_name: str, class_names: list, annotation
         class_names (list): A list of class names corresponding to the class IDs in the annotations.
         annotation_format (str): The format of the annotations ('yolo', 'voc', or 'coco').
     """
-    set_path = os.path.join('/home/nalkuq/cmm/dataset', set_name)
+    set_path = os.path.join('/home/nalkuq/DINOcut/dataset', set_name)
     images_path = os.path.join(set_path, 'images')
     labels_path = os.path.join(set_path, 'labels')
 

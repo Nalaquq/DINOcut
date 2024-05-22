@@ -689,7 +689,7 @@ def dinocut_generate():
             except:
                 pass
             # change to config file home directory. May have to also change argparse.
-            os.chdir("/home/nalkuq/cmm")
+            os.chdir("/home/nalkuq/DINOcut")
             cwd = os.getcwd()
             for files in os.listdir(cwd):
                 if files.endswith(".png"):
@@ -735,7 +735,7 @@ def dinocut_generate():
                 except:
                     pass
                 # change to config file home directory. May have to also change argparse.
-                os.chdir("/home/nalkuq/cmm")
+                os.chdir("/home/nalkuq/DINOcut")
                 cwd = os.getcwd()
                 for files in os.listdir(cwd):
                     if files.endswith(".png"):
@@ -756,7 +756,7 @@ def dinocut_generate():
 if __name__ == "__main__":
     #convert_images_in_directory(f"{config['image_settings']['source_image_path']}")
     #dinocut_generate()
-    #os.system("python3 scripts/selector.py --directory /home/nalkuq/cmm/starter_dataset --target-directory /home/nalkuq/cmm/data")
+    #os.system("python3 scripts/selector.py --directory /home/nalkuq/DINOcut/starter_dataset --target-directory /home/nalkuq/DINOcut/data")
     os.system(
         f'python3 scripts/synthetic.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
     )
