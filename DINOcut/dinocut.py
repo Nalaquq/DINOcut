@@ -21,261 +21,362 @@ import shutil
 from pyfiglet import Figlet
 from PIL import Image
 
+class GD:  # GroundingDino
+    @classmethod
+        def load_configuration(cls, yaml_path: str) -> Dict[str, Any]:
+        """
+        Load and parse configuration from a YAML file.
 
-f = Figlet(font="slant")
-print(f.renderText("DINOcut"))
+        Parameters:
+        - yaml_path (str): The path to the YAML configuration file.
 
-# Hides pytorch warnings regarding Gradient and other cross-depencies, which are pinned in DINOcut
-warnings.filterwarnings("ignore")
-init()
+        Returns:
+        - Dict[str, Any]: A dictionary with all configurations loaded from the YAML.
 
+        Raises:
+        - IOError: If there's an error opening or reading the YAML file.
+        - ValueError: If the YAML file is empty or improperly formatted.
 
-def check_path(path):
-    if os.path.isfile(path):
-        return path
-    elif os.path.isdir(path):
-        return [
-            os.path.join(path, f)
-            for f in os.listdir(path)
-            if os.path.isfile(os.path.join(path, f))
-        ]
-    else:
-        raise ValueError(
-            "The provided path is neither a file nor a directory. Ensure that your source image path in DINOcut.yaml is correct"
-        )
+        Example:
+        Assume a YAML file 'config.yaml' with the following content:
+        ---
+        paths:
+        grounding_dino_checkpoint_path: "${d_weights}/groundingdino_swint_ogc.pth"
+        grounding_dino_config_path: "config/GroundingDINO_SwinT_OGC.py"
+        model_configs:
+        sam:
+            encoder_version: "vit_h"
 
+        Using the function:
+        >>> yaml_path = 'config.yaml'
+        >>> config = load_configuration(yaml_path)
+        >>> print(config['paths']['grounding_dino_checkpoint_path'])
+        /usr/local/d_weights/groundingdino_swint_ogc.pth
+        """
+        try:
+            with tqdm(
+                total=3, desc=Fore.BLUE + "Loading DINOcut.yaml Configuration file"
+            ) as pbar:
+                # Load YAML content
+                pbar.set_postfix(step="Opening YAML file")
+                with open(yaml_path, "r") as file:
+                    config = yaml.safe_load(file)
+                pbar.update(1)
 
-def print_emoji_line(emoji_code: str, repeat_count: int) -> None:
-    """
-    Print an emoji multiple times on one line based on the provided emoji code.
+                # Check if the YAML file was empty or improperly formatted
+                pbar.set_postfix(step="Parsing YAML file")
+                if config is None:
+                    raise ValueError(
+                        "The YAML file is empty or the contents are not in valid YAML format."
+                    )
+                pbar.update(1)
 
-    Parameters:
-    emoji_code (str): The code for the emoji to be printed, e.g., ":T-Rex:".
-    repeat_count (int): The number of times the emoji should be printed.
+                # Resolve environment variables in paths if they are included
+                pbar.set_postfix(step="Resolving environment variables")
+                if "paths" in config:
+                    for key, value in config["paths"].items():
+                        # Replace environment variables in paths with actual values
+                        config["paths"][key] = os.path.expandvars(value)
+                pbar.update(1)
 
-    Returns:
-    None
-    """
-    emoji_text = emoji.emojize(emoji_code)
-    print("\n", emoji_text * repeat_count, "\n")
+        except Exception as e:
+            raise IOError(
+                Fore.RED
+                + f"An error occurred while reading or parsing the YAML file: {str(e)}"
+            )
 
+        return config
 
-print_emoji_line(":T-Rex:", 1)
+    @classmethod
+    def weights(cls):
+        # if/then to set up directory
+        pass
 
+    @classmethod
+    def cuda_enabled(cls) -> str:
+            """
+            Checks if CUDA is available on the system and prints relevant information.
 
-parser = argparse.ArgumentParser(
-    description="GroundingDINO and SAM for mask extraction."
-)
-# add optional arguments
-parser.add_argument(
-    "-src",
-    "-src_dir",
-    type=os.path.abspath,
-    help="the source directory containing your images that you will use to generate masks",
-    default=os.path.abspath("starter_dataset"),
-)
+            Returns:
+                str: 'cuda' if CUDA is available, otherwise 'cpu'.
 
-parser.add_argument(
-    "-d_weights",
-    "-dino_weights",
-    type=os.path.abspath,
-    help="the directory containing your GroundingDINO weights",
-    default=os.path.abspath("GroundingDINO/weights"),
-)
-
-
-parser.add_argument(
-    "-s_weights",
-    "-sam_weights",
-    type=os.path.abspath,
-    help="the directory containing your SAM weights",
-    default=os.path.abspath("sam/weights"),
-)
-
-args = parser.parse_args()
-
-if args.src:
-    PATH_MAIN = args.src
-    print(
-        Fore.RED + f"\n No source directory given. Main Path set to:",
-        Fore.BLUE + f"{PATH_MAIN}",
-        Fore.RED + "Please use python3 dino_sam.py -h to learn more.\n",
-    )
-else:
-    PATH_MAIN = os.path.abspath("starter_dataset")
-    print(
-        Back.GREEN
-        + f"\n No source directory given. Main Path set to {PATH_MAIN}. Please use python3 dino_sam.lspy -h to learn more\n"
-    )
-
-
-def convert_images_in_directory(directory: str) -> None:
-    """
-    Converts all images in the specified directory to .jpg format.
-
-    This function scans the given directory for files with supported image formats,
-    converts them to .jpg format, and saves them in the same directory.
-
-    Supported image formats: .png, .svg, .jpg, .jpeg, .bmp, .gif, .tiff
-
-    Args:
-        directory (str): The path to the directory containing the images to be converted.
-
-    Raises:
-        OSError: If an error occurs while opening or saving an image file.
-    """
-    
-    # Define supported image formats
-    supported_formats: Tuple[str, ...] = ('.png', '.svg', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff')
-
-    # Loop through all files in the directory
-    for filename in os.listdir(directory):
-        file_path = os.path.join(directory, filename)
-        
-        # Check if the file is an image based on its extension
-        if filename.lower().endswith(supported_formats):
+            Notes:
+                The function prints whether CUDA is available, the count of CUDA devices,
+                and the current active CUDA device index. If CUDA is not available,
+                it advises checking the CUDA installation.
+            """
             try:
-                # Open the image file
-                with Image.open(file_path) as img:
-                    # Convert the image to RGB mode if it's not already in that mode
-                    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
-                        img = img.convert("RGB")
-                    
-                    # Define the output path
-                    base, _ = os.path.splitext(filename)
-                    output_path = os.path.join(directory, base + ".jpg")
-                    
-                    # Save the image as a .jpg file
-                    img.save(output_path, "JPEG")
-                    print(f"Image saved as {output_path}")
+                with tqdm(total=3, desc=Fore.BLUE + "Checking CUDA availability") as pbar:
+                    if torch.cuda.is_available():
+                        pbar.set_postfix(step=Fore.BLUE + "Checking if CUDA is available")
+                        time.sleep(1)  # Simulate time delay
+                        pbar.update(1)
+
+                        pbar.set_postfix(step=Fore.BLUE + "Counting CUDA devices")
+                        device_count = torch.cuda.device_count()
+                        time.sleep(1)  # Simulate time delay
+                        pbar.update(1)
+
+                        pbar.set_postfix(step=Fore.BLUE + "Getting current CUDA device index")
+                        current_device = torch.cuda.current_device()
+                        time.sleep(1)  # Simulate time delay
+                        pbar.update(1)
+
+                        print("\n")
+                        print(Fore.GREEN + "\tCUDA is available.")
+                        print(Fore.GREEN + f"\tNumber of CUDA devices: {device_count}")
+                        print(Fore.GREEN + f"\tCurrent CUDA device index: {current_device}")
+                        return "cuda"
+                    else:
+                        pbar.set_postfix(step="CUDA not available, using CPU")
+                        time.sleep(1)  # Simulate time delay
+                        pbar.update(1)
+
+                        print(Fore.RED + "\tCUDA is not available. Using CPU instead.")
+                        return "cpu"
             except Exception as e:
-                print(f"Failed to convert {file_path}: {e}")
-
-def cuda_enabled() -> str:
-    """
-    Checks if CUDA is available on the system and prints relevant information.
-
-    Returns:
-        str: 'cuda' if CUDA is available, otherwise 'cpu'.
-
-    Notes:
-        The function prints whether CUDA is available, the count of CUDA devices,
-        and the current active CUDA device index. If CUDA is not available,
-        it advises checking the CUDA installation.
-    """
-    try:
-        with tqdm(total=3, desc=Fore.BLUE + "Checking CUDA availability") as pbar:
-            if torch.cuda.is_available():
-                pbar.set_postfix(step=Fore.BLUE + "Checking if CUDA is available")
-                time.sleep(1)  # Simulate time delay
-                pbar.update(1)
-
-                pbar.set_postfix(step=Fore.BLUE + "Counting CUDA devices")
-                device_count = torch.cuda.device_count()
-                time.sleep(1)  # Simulate time delay
-                pbar.update(1)
-
-                pbar.set_postfix(step=Fore.BLUE + "Getting current CUDA device index")
-                current_device = torch.cuda.current_device()
-                time.sleep(1)  # Simulate time delay
-                pbar.update(1)
-
-                print("\n")
-                print(Fore.GREEN + "\tCUDA is available.")
-                print(Fore.GREEN + f"\tNumber of CUDA devices: {device_count}")
-                print(Fore.GREEN + f"\tCurrent CUDA device index: {current_device}")
-                return "cuda"
-            else:
-                pbar.set_postfix(step="CUDA not available, using CPU")
-                time.sleep(1)  # Simulate time delay
-                pbar.update(1)
-
-                print(Fore.RED + "\tCUDA is not available. Using CPU instead.")
-                return "cpu"
-    except Exception as e:
-        print(Fore.RED + "\tAn error occurred while checking CUDA: ", str(e))
-        print(
-            Fore.RED
-            + "\tCUDA is not detected. Ensure your CUDA is up-to-date with nvidia-smi"
-        )
-        return "cpu"
-
-
-# Init CUDA
-print_emoji_line(":T-Rex:", 2)
-device = cuda_enabled()
-
-
-def load_configuration(yaml_path: str) -> Dict[str, Any]:
-    """
-    Load and parse configuration from a YAML file.
-
-    Parameters:
-    - yaml_path (str): The path to the YAML configuration file.
-
-    Returns:
-    - Dict[str, Any]: A dictionary with all configurations loaded from the YAML.
-
-    Raises:
-    - IOError: If there's an error opening or reading the YAML file.
-    - ValueError: If the YAML file is empty or improperly formatted.
-
-    Example:
-    Assume a YAML file 'config.yaml' with the following content:
-    ---
-    paths:
-      grounding_dino_checkpoint_path: "${d_weights}/groundingdino_swint_ogc.pth"
-      grounding_dino_config_path: "config/GroundingDINO_SwinT_OGC.py"
-    model_configs:
-      sam:
-        encoder_version: "vit_h"
-
-    Using the function:
-    >>> yaml_path = 'config.yaml'
-    >>> config = load_configuration(yaml_path)
-    >>> print(config['paths']['grounding_dino_checkpoint_path'])
-    /usr/local/d_weights/groundingdino_swint_ogc.pth
-    """
-    try:
-        with tqdm(
-            total=3, desc=Fore.BLUE + "Loading DINOcut.yaml Configuration file"
-        ) as pbar:
-            # Load YAML content
-            pbar.set_postfix(step="Opening YAML file")
-            with open(yaml_path, "r") as file:
-                config = yaml.safe_load(file)
-            pbar.update(1)
-
-            # Check if the YAML file was empty or improperly formatted
-            pbar.set_postfix(step="Parsing YAML file")
-            if config is None:
-                raise ValueError(
-                    "The YAML file is empty or the contents are not in valid YAML format."
+                print(Fore.RED + "\tAn error occurred while checking CUDA: ", str(e))
+                print(
+                    Fore.RED
+                    + "\tCUDA is not detected. Ensure your CUDA is up-to-date with nvidia-smi"
                 )
-            pbar.update(1)
+                return "cpu"
+    @classmethod
+    def check_path(cls, path):
+        if os.path.isfile(path):
+            return path
+        elif os.path.isdir(path):
+            return [
+                os.path.join(path, f)
+                for f in os.listdir(path)
+                if os.path.isfile(os.path.join(path, f))
+            ]
+        else:
+            raise ValueError(
+                "The provided path is neither a file nor a directory. Ensure that your source image path in DINOcut.yaml is correct"
+            )
+            pass
 
-            # Resolve environment variables in paths if they are included
-            pbar.set_postfix(step="Resolving environment variables")
-            if "paths" in config:
-                for key, value in config["paths"].items():
-                    # Replace environment variables in paths with actual values
-                    config["paths"][key] = os.path.expandvars(value)
-            pbar.update(1)
+    @classmethod    
+    def convert_images(cls, directory: str) -> None:
+        """
+        Converts all images in the specified directory to .jpg format.
 
-    except Exception as e:
-        raise IOError(
-            Fore.RED
-            + f"An error occurred while reading or parsing the YAML file: {str(e)}"
-        )
+        This function scans the given directory for files with supported image formats,
+        converts them to .jpg format, and saves them in the same directory.
 
-    return config
+        Supported image formats: .png, .svg, .jpg, .jpeg, .bmp, .gif, .tiff
+
+        Args:
+            directory (str): The path to the directory containing the images to be converted.
+
+        Raises:
+            OSError: If an error occurs while opening or saving an image file.
+        """
+        
+        # Define supported image formats
+        supported_formats: Tuple[str, ...] = ('.png', '.svg', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff')
+
+        # Loop through all files in the directory
+        for filename in os.listdir(directory):
+            file_path = os.path.join(directory, filename)
+            
+            # Check if the file is an image based on its extension
+            if filename.lower().endswith(supported_formats):
+                try:
+                    # Open the image file
+                    with Image.open(file_path) as img:
+                        # Convert the image to RGB mode if it's not already in that mode
+                        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+                            img = img.convert("RGB")
+                        
+                        # Define the output path
+                        base, _ = os.path.splitext(filename)
+                        output_path = os.path.join(directory, base + ".jpg")
+                        
+                        # Save the image as a .jpg file
+                        img.save(output_path, "JPEG")
+                        print(f"Image saved as {output_path}")
+                except Exception as e:
+                    print(f"Failed to convert {file_path}: {e}")
 
 
-print_emoji_line(":T-Rex:", 3)
-# Example usage
+    @classmethod
+    def detect(cls):
+        pass
+
+    @classmethod
+    def show_detections(cls):
+        pass
+
+    @classmethod
+    def save_image(cls):
+        pass
+
+    @classmethod
+    def save_detections(cls):
+        pass
+
+    @classmethod
+    def dinocut_generate(cls):
+        # load image
+        print(Fore.BLUE + "\nDINOCUT is detecting instances of:", Fore.GREEN + f"{CLASSES}")
+        path = check_path(SOURCE_IMAGE_PATH)
+        if isinstance(path, str):
+            image = cv2.imread(path)
+            detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
+            print_emoji_line(":T-Rex:", 6)
+            print(
+                Fore.BLUE + "\nDINOCUT is segmenting all detections for:",
+                Fore.GREEN + f"{CLASSES}",
+            )
+            print_emoji_line(":T-Rex:", 7)
+            try:
+                #dino_display_image(image, detections, CLASSES)
+                detections.mask = segment(
+                    sam_predictor=sam_predictor,
+                    image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
+                    xyxy=detections.xyxy,
+                )
+                #show_sam_detections(image, detections, CLASSES)
+                save_inverted_masks(detections.mask)
+                create_training_image(path)
+                # need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder.
+                directory = f"{path[:-4]}"
+                try:
+                    os.mkdir(directory)
+                    print(f"Making a directory named {directory} to save masks and labels.")
+                except:
+                    pass
+                # change to config file home directory. May have to also change argparse.
+                os.chdir(config["paths"]["home_directory"])
+                cwd = os.getcwd()
+                for files in os.listdir(cwd):
+                    if files.endswith(".png"):
+                        shutil.move(files, directory)
+                    if files.endswith(".jpg"):
+                        shutil.move(files, directory)
+                    else:
+                        pass
+            except:
+                print(
+                    Fore.RED + f"\nDinoCut was unable to find any instances of:",
+                    Fore.BLUE + f"{CLASSES}",
+                    Fore.RED
+                    + "\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.",
+                )
+        if isinstance(path, list):
+            for file in path:
+                path = file
+                image = cv2.imread(path)
+                detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
+                print_emoji_line(":T-Rex:", 6)
+                print(
+                    Fore.BLUE + "\nDINOCUT is segmenting all detections for:",
+                    Fore.GREEN + f"{CLASSES}",
+                )
+                print_emoji_line(":T-Rex:", 7)
+                try:
+                    # comment out this line if you don't want to see annotations. 
+                    #dino_display_image(image, detections, CLASSES)
+                    detections.mask = segment(
+                        sam_predictor=sam_predictor,
+                        image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
+                        xyxy=detections.xyxy,
+                    )
+                    #show_sam_detections(image, detections, CLASSES)
+                    mask = save_inverted_masks(detections.mask)
+                    create_training_image(path)
+                    directory = f"{path[:-4]}"
+                    try:
+                        os.mkdir(directory)
+                        print(
+                            f"Making a directory named {directory} to save masks and labels."
+                        )
+                    except:
+                        pass
+                    # change to config file home directory. May have to also change argparse.
+                    os.chdir(config["paths"]["home_directory"])
+                    cwd = os.getcwd()
+                    for files in os.listdir(cwd):
+                        if files.endswith(".png"):
+                            shutil.move(files, directory)
+                        if files.endswith(".jpg"):
+                            shutil.move(files, directory)
+                        else:
+                            pass
+                except:
+                    print(
+                        Fore.RED + f"\nDinoCut was unable to find any instances of:",
+                        Fore.BLUE + f"{CLASSES}",
+                        Fore.RED
+                        + "\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.",
+                    )
+
+class SAM:
+    @classmethod
+    def weights(cls):
+        pass
+
+    @classmethod
+    def paths(cls):
+        # read image as array
+        pass
+
+    @classmethod
+    def detect(cls):
+        pass
+
+    @classmethod
+    def show_detections(cls):
+        pass
+
+    @classmethod
+    def save_image(cls):
+        pass
+
+    @classmethod
+    def save_masks(cls):
+        pass
+
+
+class CPL:
+    @classmethod
+    def make_directories(cls):
+        pass
+
+    @classmethod
+    def get_masks_and_images(cls):
+        pass
+
+    @classmethod
+    def make_images(cls):
+        pass
+
+    @classmethod
+    def training_test_split(cls):
+        pass
+
+    @classmethod
+    def annotate(cls):
+        pass
+
+    @classmethod
+    def convert_yolo_voc(cls):
+        pass
+
+    @classmethod
+    def convert_yolo_coco(cls):
+        pass
+
+    @classmethod
+    def visualize(cls):
+        pass
+
+
+'''
 yaml_path = "dinocut_config.yaml"
 config = load_configuration(yaml_path)
-
 
 # Environment variables
 GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(
@@ -287,12 +388,9 @@ SAM_CHECKPOINT_PATH = os.path.join(
     args.s_weights, config["paths"]["sam_checkpoint_path"]
 )
 SAM_ENCODER_VERSION = config["model_configs"]["sam"]["encoder_version"]
+'''
 
 
-grounding_dino_model = Model(
-    model_config_path=GROUNDING_DINO_CONFIG_PATH,
-    model_checkpoint_path=GROUNDING_DINO_CHECKPOINT_PATH,
-)
 sam = sam_model_registry[SAM_ENCODER_VERSION](checkpoint=SAM_CHECKPOINT_PATH).to(
     device=device
 )
@@ -304,33 +402,7 @@ SOURCE_IMAGE_PATH = config["image_settings"]["source_image_path"]
 
 CLASSES = config["image_settings"]["classes"]
 CLASSES = [s.lower() for s in CLASSES]
-BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
-TEXT_TRESHOLD = config["image_settings"]["thresholds"]["text"]
 
-
-print_emoji_line(":T-Rex:", 4)
-print(Fore.BLUE + "\nChecking Config Settings:")
-print(
-    Fore.GREEN + "\n\tGrounding DINO Checkpoint Path:",
-    Fore.RED + config["paths"]["grounding_dino_checkpoint_path"],
-)
-print(
-    Fore.GREEN + "\tSAM Checkpoint Path:",
-    Fore.RED + config["paths"]["sam_checkpoint_path"],
-)
-print(
-    Fore.GREEN + "\tBox Threshold:",
-    Fore.RED + str(config["image_settings"]["thresholds"]["box"]),
-)
-print(
-    Fore.GREEN + "\tBox Threshold:",
-    Fore.RED + str(config["image_settings"]["thresholds"]["text"]),
-)
-print(Fore.GREEN + f"\tYour text prompt is:", Fore.RED + f"{CLASSES}")
-
-
-print(Fore.GREEN + "\tImage Source Path:", Fore.RED + f"{SOURCE_IMAGE_PATH}")
-print_emoji_line(":T-Rex:", 5)
 
 
 def enhance_class_name(class_names: List[str]) -> List[str]:
@@ -411,6 +483,15 @@ def dino_detection(
                     }
     """
     # Assuming grounding_dino_model is predefined and has a predict_with_classes method
+    # Environment variables
+    GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(
+    args.d_weights, config["paths"]["grounding_dino_checkpoint_path"])
+    GROUNDING_DINO_CONFIG_PATH = config["paths"]["grounding_dino_config_path"]
+    BOX_TRESHOLD = config["image_settings"]["thresholds"]["box"]
+    TEXT_TRESHOLD = config["image_settings"]["thresholds"]["text"]
+    grounding_dino_model = Model(
+    model_config_path=GROUNDING_DINO_CONFIG_PATH,
+    model_checkpoint_path=GROUNDING_DINO_CHECKPOINT_PATH,)
     enhanced_classes = enhance_class_name(class_names)
     detections = grounding_dino_model.predict_with_classes(
         image=image,
@@ -658,106 +739,5 @@ def create_training_image(path):
             print(f"Saved {feature_img_path}")
 
 
-def dinocut_generate():
-    # load image
-    print(Fore.BLUE + "\nDINOCUT is detecting instances of:", Fore.GREEN + f"{CLASSES}")
-    path = check_path(SOURCE_IMAGE_PATH)
-    if isinstance(path, str):
-        image = cv2.imread(path)
-        detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
-        print_emoji_line(":T-Rex:", 6)
-        print(
-            Fore.BLUE + "\nDINOCUT is segmenting all detections for:",
-            Fore.GREEN + f"{CLASSES}",
-        )
-        print_emoji_line(":T-Rex:", 7)
-        try:
-            #dino_display_image(image, detections, CLASSES)
-            detections.mask = segment(
-                sam_predictor=sam_predictor,
-                image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
-                xyxy=detections.xyxy,
-            )
-            #show_sam_detections(image, detections, CLASSES)
-            save_inverted_masks(detections.mask)
-            create_training_image(path)
-            # need to fix this so that it checks/passes if the directory is already named. Also need to make a images/masks folder.
-            directory = f"{path[:-4]}"
-            try:
-                os.mkdir(directory)
-                print(f"Making a directory named {directory} to save masks and labels.")
-            except:
-                pass
-            # change to config file home directory. May have to also change argparse.
-            os.chdir(config["paths"]["home_directory"])
-            cwd = os.getcwd()
-            for files in os.listdir(cwd):
-                if files.endswith(".png"):
-                    shutil.move(files, directory)
-                if files.endswith(".jpg"):
-                    shutil.move(files, directory)
-                else:
-                    pass
-        except:
-            print(
-                Fore.RED + f"\nDinoCut was unable to find any instances of:",
-                Fore.BLUE + f"{CLASSES}",
-                Fore.RED
-                + "\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.",
-            )
-    if isinstance(path, list):
-        for file in path:
-            path = file
-            image = cv2.imread(path)
-            detections = dino_detection(image, CLASSES, BOX_TRESHOLD, TEXT_TRESHOLD)
-            print_emoji_line(":T-Rex:", 6)
-            print(
-                Fore.BLUE + "\nDINOCUT is segmenting all detections for:",
-                Fore.GREEN + f"{CLASSES}",
-            )
-            print_emoji_line(":T-Rex:", 7)
-            try:
-                # comment out this line if you don't want to see annotations. 
-                #dino_display_image(image, detections, CLASSES)
-                detections.mask = segment(
-                    sam_predictor=sam_predictor,
-                    image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
-                    xyxy=detections.xyxy,
-                )
-                #show_sam_detections(image, detections, CLASSES)
-                mask = save_inverted_masks(detections.mask)
-                create_training_image(path)
-                directory = f"{path[:-4]}"
-                try:
-                    os.mkdir(directory)
-                    print(
-                        f"Making a directory named {directory} to save masks and labels."
-                    )
-                except:
-                    pass
-                # change to config file home directory. May have to also change argparse.
-                os.chdir(config["paths"]["home_directory"])
-                cwd = os.getcwd()
-                for files in os.listdir(cwd):
-                    if files.endswith(".png"):
-                        shutil.move(files, directory)
-                    if files.endswith(".jpg"):
-                        shutil.move(files, directory)
-                    else:
-                        pass
-            except:
-                print(
-                    Fore.RED + f"\nDinoCut was unable to find any instances of:",
-                    Fore.BLUE + f"{CLASSES}",
-                    Fore.RED
-                    + "\nPlease alter the prompt, box threshold, or text threshold in dincut_config.yaml.",
-                )
 
 
-if __name__ == "__main__":
-    #convert_images_in_directory(f"{config['image_settings']['source_image_path']}")
-    #dinocut_generate()
-    #os.system(f"python3 scripts/selector.py --directory {config['image_settings']['source_image_path']} --target-directory {config['paths']['data_directory']}")
-    os.system(
-        f'python3 scripts/synthetic.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
-    )

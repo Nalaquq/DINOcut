@@ -43,7 +43,7 @@ parser.add_argument(
     "-num",
     type=int,
     help="The number of images to be generated. Images will be generated according to a 80/20/20 Train/Test/Val split",
-    default=20,
+    default=10000,
 )
 parser.add_argument(
     "-io",
