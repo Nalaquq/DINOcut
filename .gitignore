@@ -15,9 +15,8 @@ examples
 #ignore .vscode
 .vscode 
 
-# But don't ignore the directory itself
-!starter_dataset/
-
 # Ignore everything in the starter_dataset directory
 starter_dataset/*
+
+!starter_dataset/.gitkeep 
 
