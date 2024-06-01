@@ -33,15 +33,16 @@ Our original implementation uses [Li et al's 2021 BG-20K dataset](https://papers
 
 Distractor objects saved in the bg_noise directory should contain seperate folders for images and masks. You can download mask and image files for distactors from [shapenet](https://shapenet.org/) or make your own. 
 
-3. Run DINOCUT from the command line: 
+3. Configure your dinocut_congif.yaml file with your specified arguments. 
+4. Run DINOCUT from the command line: 
 ```bash
 python3 dinocut.py 
 ```
-4. Review segmentation masks and delete false positives: 
+5. Review segmentation masks and delete false positives: 
 
-5. Sit back and relax as DINOcut generates your dataset. 
+6. Sit back and relax as DINOcut generates your dataset. 
 
-6. You can also use our [Cut, Paste, Learn](https://arxiv.org/abs/1708.01642) implementation as a standalone CLI: 
+7. You can also use our [Cut, Paste, Learn](https://arxiv.org/abs/1708.01642) implementation as a standalone CLI: 
 ```bash
 python3 sythetic.py -h
 ```
