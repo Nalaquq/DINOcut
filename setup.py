@@ -4,7 +4,7 @@ from setuptools import setup  # Changed from distutils.core to setuptools
 import os
 import urllib.request
 
-os.system("python3 install torch")
+os.system("pip3 install torch")
 
 repository_url = "https://github.com/IDEA-Research/GroundingDINO.git"
 commit_hash = "57535c5a79791cb76e36fdb64975271354f10251"
@@ -41,10 +41,18 @@ def check_package_installed(package: str) -> bool:
     return package.lower() in installed_packages.lower()
 
 def install_github_repo(url: str, commit_hash: str) -> None:
+    home=os.getcwd()
     repo_name = url.split('/')[-1].replace('.git', '')
     run_command(f"git clone {url}")
     run_command(f"cd {repo_name} && git checkout -q {commit_hash}")
-    os.system("python3 setup.py")
+    os.system("pip3 install torch")
+    os.system("python3 GroundingDINO/setup.py")
+    os.system("pip3 install -r GroundingDINO/requirements.txt")
+    os.system("python -m pip install -e GroundingDINO")
+    os.mkdir("GroundingDINO/weights")
+    os.chdir("GroundingDINO/weights")
+    os.system("wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth")
+    os.chdir(home)
     #install_requirements(repo_name)
     #run_command(f"cd {repo_name} && {sys.executable} -m pip install -q -e .")
 
@@ -66,7 +74,7 @@ if __name__ == "__main__":
         main()
     except:
         "SAM weight files are already installed" 
-    install_requirements("requirements.txt")
+    os.system("pip3 install -r requirements.txt")
 
 
 
