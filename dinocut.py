@@ -5,7 +5,7 @@ import supervision as sv
 import argparse
 from groundingdino.util.inference import Model
 from segment_anything import sam_model_registry, SamPredictor
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Union
 import cv2
 import numpy as np
 import math
@@ -658,9 +658,39 @@ def create_training_image(path):
             print(f"Saved {feature_img_path}")
 
 
+def remove_zone_identifiers(directory: Union[str, bytes, os.PathLike]) -> int:
+    """
+    Remove all zone identifier files from the given directory.
+    
+    Args:
+        directory (Union[str, bytes, os.PathLike]): The path to the directory.
+        
+    Returns:
+        int: The number of zone identifier files removed.
+    """
+    if not os.path.isdir(directory):
+        raise ValueError(f"The provided path '{directory}' is not a directory.")
+
+    count = 0
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(':Zone.Identifier'):
+                file_path = os.path.join(root, file)
+                try:
+                    os.remove(file_path)
+                    count += 1
+                    print(f"Removed: {file_path}")
+                except Exception as e:
+                    print(f"Error removing {file_path}: {e}")
+
+    return count
+
+
+
 def dinocut_generate():
     # load image
     print(Fore.BLUE + "\nDINOCUT is detecting instances of:", Fore.GREEN + f"{CLASSES}")
+    removed_files_count = remove_zone_identifiers(SOURCE_IMAGE_PATH)
     path = check_path(SOURCE_IMAGE_PATH)
     if isinstance(path, str):
         image = cv2.imread(path)
@@ -756,8 +786,6 @@ def dinocut_generate():
 
 if __name__ == "__main__":
     #convert_images_in_directory(f"{config['image_settings']['source_image_path']}")
-    #dinocut_generate()
-    #os.system(f"python3 scripts/selector.py --directory {config['image_settings']['source_image_path']} --target-directory {config['paths']['data_directory']}")
-    os.system(
-        f'python3 scripts/synthetic.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}'
-    )
+    dinocut_generate()
+    os.system(f"python3 scripts/selector.py --directory {config['image_settings']['source_image_path']} --target-directory {config['paths']['data_directory']}")
+    os.system(f'python3 scripts/synthetic.py -n {config["image_settings"]["number"]} -io {config["image_settings"]["image_overlap"]} -max_obj {config["image_settings"]["max_obj"]} -min {config["image_settings"]["min_size"]} -max {config["image_settings"]["max_size"]} -erase {config["image_settings"]["erase"]} -format {config["image_settings"]["format"]}')
