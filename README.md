@@ -63,10 +63,11 @@ The goal of this project is simple: to combine sommething old with soemthing new
 git clone https://github.com/Nalaquq/cmm.git
 ```
 
-2. Install the required dependencies.
+2. Create and activate your virtual environment:
 
 ```bash
-pip install -e .
+python3 -m venv venv
+source venv.sh
 ```
 
 3.  Run setup.py
