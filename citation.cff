@@ -1,8 +1,9 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-  - name: "Sean Gleason"
+  - name: "Co-Author 1"
+  - name: "Co-Author 2"
 title: "DinoCut"
 date-released: 2024-05-30
-url: "https://github.com/Nalaquq/cmm.git"
+url: "https://github.com/Nalaquq/DINOcut.git"
 license: Apache-2.0
