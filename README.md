@@ -55,13 +55,15 @@ The goal of this project is simple: to combine sommething old with soemthing new
 </div>
  
 # 🔧 Install 
+DINOcut was designed for CUDA-enabled devices running a Ubuntu 22.04 operating system with Python 3.10.12. You can either install DINOcut directly from source or use Docker. 
 
-**Installation:**
+***Direct from source:***
+
 
 1.Clone DinoCut from GitHub.
 
 ```bash
-git clone https://github.com/Nalaquq/cmm.git
+git clone https://github.com/Nalaquq/DINOcut.git
 ```
 
 2. Create and activate your virtual environment:
@@ -76,7 +78,35 @@ source venv.sh
 ```bash
 python3 setup.py
 ```
+
+**DOCKER Install**
+## Running the Application in Docker
+
+1. **Clone the repository:**
+
+    ```sh
+    git clone https://github.com/Nalaquq/DINOcut.git
+    cd DINOcut
+    ```
+
+2. **Build the Docker image:**
+
+    ```sh
+    docker build -t dinocut .
+    ```
+
+3. **Run the Docker container:**
+
+    ```sh
+    docker run -p 80:80 dinocut
+    ```
+
+    This will start the application and make it accessible on port 80.
+
+
 # 😳 Troubleshooting 
+
+
 **Virtual Environments:**
 
 We strongly encourage the use of a [python virtual environment](https://docs.python.org/3/library/venv.html) to manage packages and paths. To create a virtual environment use the following command: 
