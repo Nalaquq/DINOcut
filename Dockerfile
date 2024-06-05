@@ -5,5 +5,5 @@ RUN DEBIAN_FRONTEND=noninteractive \
   && apt-get install -y python3 \
   && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/Nalaquq/DINOcut.git
-WORKDIR /DINOcut
+#WORKDIR /DINOcut
 CMD ["python3", "setup.py"]
