@@ -1,3 +1,4 @@
+*.cache
 # ignore venv
 venv
 #ignore sam folder
@@ -13,6 +14,7 @@ dataset/train/images/*
 dataset/train/labels/*
 dataset/val/images/*
 dataset/val/labels/*
+
 #ignore Images directory
 images 
 #Ignore Examples
@@ -24,4 +26,5 @@ examples
 starter_dataset/*
 
 !starter_dataset/.gitkeep 
+
 
