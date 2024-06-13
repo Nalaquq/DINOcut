@@ -32,8 +32,9 @@ examples
 .vscode 
 
 # Ignore everything in the starter_dataset directory
-!starter_dataset/.gitkeep 
 starter_dataset/*
+!starter_dataset/.gitkeep 
+
 
 
 
