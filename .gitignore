@@ -15,6 +15,14 @@ dataset/train/labels/*
 dataset/val/images/*
 dataset/val/labels/*
 
+!dataset/test/images/.gitkeep
+!dataset/test/labels/.gitkeep
+!dataset/train/images/.gitkeep
+!dataset/train/labels/.gitkeep
+!dataset/val/images/.gitkeep
+!dataset/val/labels/.gitkeep
+
+
 #ignore Images directory
 images 
 #Ignore Examples
