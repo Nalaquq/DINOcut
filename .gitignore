@@ -8,6 +8,14 @@ GroundingDINO
 #Ignore Data
 data
 
+
+dataset/test/images/*
+dataset/test/labels/*
+dataset/train/images/*
+dataset/train/labels/*
+dataset/val/images/*
+dataset/val/labels/*
+
 !dataset/test/images/.gitkeep
 !dataset/test/labels/.gitkeep
 !dataset/train/images/.gitkeep
@@ -15,10 +23,7 @@ data
 !dataset/val/images/.gitkeep
 !dataset/val/labels/.gitkeep
 
-
-
-#ignore Images directory
-images 
+ 
 #Ignore Examples
 examples 
 #ignore .vscode
