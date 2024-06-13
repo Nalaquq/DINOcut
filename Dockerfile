@@ -1,35 +1,60 @@
-# Use the official Ubuntu 22.04 LTS (jammy) image as the base image
-FROM ubuntu:22.04
+# syntax=docker/dockerfile:1
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
+
+# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+
+ARG PYTHON_VERSION=3.10.12
+FROM python:${PYTHON_VERSION}-slim as base
+
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Keeps Python from buffering stdout and stderr to avoid situations where
+# the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
 
-# Install necessary dependencies using bash
-RUN /bin/bash -c "apt-get update && \
-    apt-get install -y software-properties-common"
-
-# Add deadsnakes PPA for Python 3.10
-RUN /bin/bash -c "add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update"
-
-# Install Python 3.10 and necessary tools
-RUN /bin/bash -c "apt-get install -y python3.10 python3.10-dev python3.10-venv python3-pip"
-
-# Clean up
-RUN /bin/bash -c "apt-get clean && rm -rf /var/lib/apt/lists/*"
-
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-# Set the working directory to /app
 WORKDIR /app
 
-# Install any needed packages using setup.py
-RUN /bin/bash -c "python3.10 setup.py install"
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
 
-# Run the application
-CMD ["python3.10", "dinocut.py"]
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y git
+
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+
+COPY . . 
+
+# Switch to the non-privileged user to run the application.
+USER root 
+RUN pip install --upgrade pip && pip install wheel
+RUN python3 setup.py
+
+USER appuser
+ 
+# Copy the source code into the container.
+#COPY . .
+
+# Expose the port that the application listens on.
+EXPOSE 8000
+
+# Run the application.
+
+#RUN python3 setup.py
+
+RUN python3 dinocut.py 
