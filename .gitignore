@@ -7,13 +7,6 @@ sam
 GroundingDINO
 #Ignore Data
 data
-#Ignore Images Directory
-dataset/test/images/*
-dataset/test/labels/*
-dataset/train/images/*
-dataset/train/labels/*
-dataset/val/images/*
-dataset/val/labels/*
 
 !dataset/test/images/.gitkeep
 !dataset/test/labels/.gitkeep
@@ -21,6 +14,7 @@ dataset/val/labels/*
 !dataset/train/labels/.gitkeep
 !dataset/val/images/.gitkeep
 !dataset/val/labels/.gitkeep
+
 
 
 #ignore Images directory
