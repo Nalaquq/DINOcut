@@ -7,7 +7,12 @@ GroundingDINO
 #Ignore Data
 data
 #Ignore Images Directory
-dataset
+dataset/test/images/*
+dataset/test/labels/*
+dataset/train/images/*
+dataset/train/labels/*
+dataset/val/images/*
+dataset/val/labels/*
 #ignore Images directory
 images 
 #Ignore Examples
