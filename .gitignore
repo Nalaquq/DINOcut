@@ -6,7 +6,7 @@ sam
 #ignore GroundingDINO
 GroundingDINO
 #Ignore Data
-#data/*
+data/*
 #!data/background/h_0a9a3552.jpg
 #!data/bg_noise/images/1.png
 #!data/bg_noise/masks/1.png
