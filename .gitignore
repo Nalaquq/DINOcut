@@ -7,9 +7,9 @@ sam
 GroundingDINO
 #Ignore Data
 data/*
-#!data/background/h_0a9a3552.jpg
-#!data/bg_noise/images/1.png
-#!data/bg_noise/masks/1.png
+!data/background/h_0a9a3552.jpg
+!data/bg_noise/images/1.png
+!data/bg_noise/masks/1.png
 
 dataset/test/images/*
 dataset/test/labels/*
