@@ -125,7 +125,7 @@ def convert_images_in_directory(directory: str) -> None:
         OSError: If an error occurs while opening or saving an image file.
     """
     
-    # Define supported image formats
+    # Define supported image formatsyaml
     supported_formats: Tuple[str, ...] = ('.png', '.svg', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff')
 
     # Loop through all files in the directory
@@ -206,7 +206,7 @@ print_emoji_line(":T-Rex:", 2)
 device = cuda_enabled()
 
 
-def load_configuration(yaml_path: str) -> Dict[str, Any]:
+def load_configuration(_path: str) -> Dict[str, Any]:
     """
     Load and parse configuration from a YAML file.
 

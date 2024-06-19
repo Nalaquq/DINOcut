@@ -21,7 +21,7 @@ image_settings:
   max_size: 800 #he maximum size of generated images. The defauly is 800px. An error will occur if a max size is selected that is larger than the background image size.
   erase: True # Boolean value that deletes all files in dataset directory before generation. Default is True. 
   classes:
-    - "semilunar knife" # change for each class in the object detector. Must be a qualitative label in lowercase. 
+    - "spongebob squarepants" # change for each class in the object detector. Must be a qualitative label in lowercase. 
   thresholds: #The text and box thresholds used by GroundingDINO and SAM to extract features using zero-shot detection
     box: 0.30
     text: 0.20
