@@ -1,60 +1,44 @@
-# syntax=docker/dockerfile:1
+FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
+ENV CUDA_HOME=/usr/local/cuda \
+     TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0 7.5 8.0 8.6+PTX" \
+     SETUPTOOLS_USE_DISTUTILS=stdlib
+     ARG USE_CUDA=1
 
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+RUN conda update conda -y
 
-ARG PYTHON_VERSION=3.10.12
-FROM python:${PYTHON_VERSION}-slim as base
+# Install libraries in the brand new image. 
+RUN apt-get -y update && apt-get install -y --no-install-recommends \
+         wget \
+         build-essential \
+         git \
+         python3-opencv \
+         ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Prevents Python from writing pyc files.
-ENV PYTHONDONTWRITEBYTECODE=1
+# Set the working directory for all the subsequent Dockerfile instructions.
+WORKDIR /opt/program
 
-# Keeps Python from buffering stdout and stderr to avoid situations where
-# the application crashes without emitting any logs due to buffering.
-ENV PYTHONUNBUFFERED=1
+RUN git clone https://github.com/IDEA-Research/GroundingDINO.git
 
-WORKDIR /app
+RUN mkdir weights ; cd weights ; wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth ; cd ..
 
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/go/dockerfile-user-best-practices/
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
+RUN conda install -c "nvidia/label/cuda-12.1.1" cuda -y
+ENV CUDA_HOME=$CONDA_PREFIX
 
+ENV PATH=/usr/local/cuda/bin:$PATH
 
+RUN cd GroundingDINO/ && python -m pip install .
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y git
-
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
-
-COPY . . 
-
-# Switch to the non-privileged user to run the application.
-USER root 
-RUN pip install --upgrade pip && pip install wheel
-RUN python3 setup.py
-
-USER appuser
- 
 # Copy the source code into the container.
-#COPY . .
+COPY . .
 
 # Expose the port that the application listens on.
 EXPOSE 8000
 
 # Run the application.
 
-#RUN python3 setup.py
+RUN python3 setup.py
 
 RUN python3 dinocut.py 
