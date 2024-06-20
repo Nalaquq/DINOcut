@@ -20,7 +20,7 @@ DINOcut is an AVCA image-processing pipeline that procedurally generates synthet
 
 
 #  Usage
-1. Modify dinocut_config.yaml to specify the paths for your input images, model parameters, and input prompts. 
+1. Modify dinocut_config.yaml to specify the paths for your input images, model parameters, and input prompts. Make sure to include full paths: example/path/to/my/directory
 2. Upload background and distractor objects to the background and bg_noise directories: 
 ```bash
 ├── data
@@ -33,7 +33,7 @@ Our original implementation uses [Li et al's 2021 BG-20K dataset](https://papers
 
 Distractor objects saved in the bg_noise directory should contain seperate folders for images and masks. You can download mask and image files for distactors from [shapenet](https://shapenet.org/) or make your own. 
 
-3. Configure your dinocut_congif.yaml file with your specified arguments. 
+3. Configure your dinocut_congif.yaml file with your text prompt and specified data augmentation parameters. 
 4. Run DINOCUT from the command line: 
 ```bash
 python3 dinocut.py 
@@ -55,7 +55,7 @@ The goal of this project is simple: to combine sommething old with soemthing new
 </div>
  
 # 🔧 Install 
-DINOcut was designed for CUDA-enabled devices running a Ubuntu 22.04 operating system with Python 3.10.12. You can either install DINOcut directly from source or use Docker. 
+DINOcut was designed for CUDA-enabled devices running a Ubuntu 22.04 operating system with Python 3.10.12. The preffered method of installation is from source on a unix operating system with a CUDA-enabled device. You can also use our Docker image: 
 
 ***Direct from source:***
 
@@ -185,7 +185,7 @@ https://github.com/IDEA-Research/GroundingDINO/issues/193
     ├── GroundingDINO       # GroundingDINO model installed by setup.py
     ├── sam                 # The Segment Anything Model and weights downloade by setup.py
     ├── scripts             # Utility functions and synthetic.py
-    ├── starter_dataset     # Directoryu to place scraped images into this folder for DINOcut to parse.
+    ├── starter_dataset     # Directory to place scraped images into this folder for DINOcut to parse.
     ├── citation.cff        # Relevent citations for the project
     ├── dinocut_config.yaml # yaml file for DINOcut settings
     ├── dinocut.py          # the main app for DINOcut
