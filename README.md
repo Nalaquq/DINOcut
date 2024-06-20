@@ -55,7 +55,7 @@ The goal of this project is simple: to combine sommething old with soemthing new
 </div>
  
 # 🔧 Install 
-DINOcut was designed for CUDA-enabled devices running a Ubuntu 22.04 operating system with Python 3.10.12. The preffered method of installation is from source on a unix operating system with a CUDA-enabled device. You can also use our Docker image: 
+DINOcut was designed for CUDA-enabled devices running a Ubuntu 22.04 operating system with Python 3.10.12. The preffered method of installation is from source on a unix operating system with a CUDA-enabled device or WSL for windows users. You can also install DINOcut with Docker.
 
 ***Direct from source:***
 
@@ -75,7 +75,9 @@ DINOcut was designed for CUDA-enabled devices running a Ubuntu 22.04 operating s
     python3 setup.py
     ```
 
+
 **DOCKER Install**
+
 ## Running the Application in Docker
 
 1. **Clone the repository:**
