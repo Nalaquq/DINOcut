@@ -16,7 +16,7 @@ DINOcut is an AVCA image-processing pipeline that procedurally generates synthet
 
 #  DEMO 
 
-[![DINOcut DEMO](assets/dinocut_video_thumbnail.png)](https://youtu.be/rYrzGJQ1-MY "DINOcut DEMO Video")
+[![DINOcut DEMO](assets/dinocut_video_thumbnail.png)](https://youtu.be/n6LSkqTaKd8 "DINOcut DEMO Video")
 
 
 #  Usage
